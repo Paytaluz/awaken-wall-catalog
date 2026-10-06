@@ -393,7 +393,7 @@ body{background:var(--bg)}
 .rail button::after{content:attr(data-tip);position:absolute;left:52px;top:50%;transform:translateY(-50%) translateX(-4px);white-space:nowrap;background:#EEEAE0;color:#14161C;font:600 12px var(--body);padding:5px 9px;border-radius:7px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
 .rail button:hover::after{opacity:1;transform:translateY(-50%)}
 .zoom{display:none}
-.layers{position:absolute;left:84px;top:50%;transform:translateY(-50%);z-index:5;width:280px;padding:16px;border-radius:16px;background:rgba(17,19,26,.92);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);display:grid;gap:14px;box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
+.layers{max-height:calc(100% - 140px);overflow:auto;position:absolute;left:84px;top:50%;transform:translateY(-50%);z-index:5;width:280px;padding:16px;border-radius:16px;background:rgba(17,19,26,.92);border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);display:grid;gap:14px;box-shadow:0 24px 50px -20px rgba(0,0,0,.8)}
 .layers h4{margin:0;font:700 11px var(--body);letter-spacing:2px;text-transform:uppercase;color:var(--ink-2)}
 .layers .row{display:flex;flex-wrap:wrap;gap:6px}
 .tog{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;font-weight:600;padding:4px 0}
@@ -493,6 +493,55 @@ body{background:var(--bg)}
 .ind{}
 .tprof{font-size:14px;color:var(--ink-2);line-height:1.5}
 @media (max-width:820px){.gate-logo{left:20px;top:22px}}
+
+/* ===== v7: compact type & lines, satellite, population ===== */
+body{font-size:14px}
+.top .logo{font-size:16px;letter-spacing:4px}.top .mark{width:24px;height:24px}
+.tabs button{font-size:12.5px;padding:6px 12px}
+.btn{padding:8px 15px;font-size:13px}
+.who{font-size:12px}.who .av{width:26px;height:26px;font-size:12px}
+.statbar{gap:22px;bottom:14px}.statbar b{font-size:30px}.statbar span{font-size:9px;letter-spacing:1.6px}
+.hintcap h1{font-size:clamp(20px,2.2vw,30px)}.hintcap p{font-size:12px}
+.drawer h2{font-size:25px}.drawer h3{font-size:15px}.dpad{gap:18px;font-size:13.5px}
+.eyebrow{font-size:10px;letter-spacing:2.2px}
+.facts b{font-size:14.5px}.facts span{font-size:9.5px}
+.cityfacts b{font-size:17px}.cityfacts span{font-size:9px}
+.fx{padding:10px 18px 10px 12px;gap:14px}.fx .t b{font-size:18px}.fx .num{font-size:22px}.fx .dial{width:54px;height:54px}.fx .t span{font-size:11px}.fx .t small{font-size:9px}
+.zc b{font-size:14.5px}.az{font-size:12.5px}.tprof{font-size:13px}
+.wcard .meta b{font-size:12.5px}.wcard .meta{font-size:11.5px}.v360{font-size:12px;padding:5px 10px}
+.searchbox{padding:6px 12px;font-size:13px}.chip{font-size:11.5px;padding:4px 10px}
+.rail{gap:4px;padding:5px}.rail button{width:36px;height:36px}.rail svg{width:17px;height:17px}
+.legend{font-size:11px}.layers{gap:11px}.tog{font-size:12.5px}
+.tip{font-size:11.5px;padding:5px 9px}
+.lbl{font-weight:600}
+.bus{stroke-width:1.8}.bus-halo{stroke-width:3.6}.rail-line{stroke-width:1.3;stroke-dasharray:5 3}.rail-bed{stroke-width:3.2}.route-line{stroke-width:2}
+.beacon .num{font-size:9.5px}.beacon .tag text{font-size:9.5px}.beacon .core{stroke-width:1.6}
+.linfo dl{font-size:13px}.dgrid b{font-size:16px}
+.gate-art h1{font-size:clamp(32px,4.2vw,58px)}.gstats b{font-size:32px}
+.loader .pct{font-size:50px}
+/* satellite */
+#g-sat image{transition:opacity .4s ease}
+#g-sat{filter:brightness(.78) saturate(.9) contrast(1.05)}
+.sat{background:#06070A}
+.sat .ts{stroke:rgba(255,255,255,.55);stroke-width:.9}
+.sat .ts.zA{fill:rgba(245,184,0,.16)} .sat .ts.zB{fill:rgba(238,138,92,.15)} .sat .ts.zC{fill:rgba(138,147,168,.06)}
+.sat .heat .ts.h0,.sat .ts.h0{}
+.sat #map.heat .ts.h1{fill:rgba(170,130,40,.25)} .sat #map.heat .ts.h2{fill:rgba(225,170,0,.32)} .sat #map.heat .ts.h3{fill:rgba(255,212,71,.42)} .sat #map.heat .ts.h0{fill:rgba(0,0,0,.05)}
+.sat .ts:hover{fill:rgba(255,255,255,.12)}
+.sat .lake,.sat .waterlbl{display:none}
+.satattr{position:absolute;right:12px;bottom:8px;z-index:3;margin:0;font-size:10px;color:rgba(238,234,224,.7);background:rgba(11,13,18,.6);padding:2px 8px;border-radius:6px;max-width:60%;text-align:right}
+.has-panel .satattr{right:448px}
+@media (max-width:820px){.has-panel .satattr{right:12px}.satattr{bottom:auto;top:62px;font-size:9px}}
+/* population */
+.popmode .ts.p0{fill:rgba(130,150,255,.18)} .popmode .ts.p1{fill:rgba(130,150,255,.36)} .popmode .ts.p2{fill:rgba(150,130,255,.55)} .popmode .ts.p3{fill:rgba(190,120,255,.75)}
+.sat .popmode .ts.p0{fill:rgba(130,150,255,.12)} .sat .popmode .ts.p1{fill:rgba(130,150,255,.22)} .sat .popmode .ts.p2{fill:rgba(150,130,255,.32)} .sat .popmode .ts.p3{fill:rgba(190,120,255,.45)}
+.popcard{display:grid;grid-template-columns:1.3fr 1fr .8fr;gap:0;border:1px solid var(--glass-line);border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(245,184,0,.10),rgba(255,255,255,.02))}
+.popcard div{padding:12px;display:grid;gap:3px}
+.popcard div + div{border-left:1px solid var(--glass-line)}
+.popcard span{font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+.popcard b{font-family:var(--display);font-size:22px;font-weight:600;line-height:1;color:var(--ink)}
+.popcard div:first-child b{color:var(--sun);font-size:26px}
+.popcard small{font-size:11px;color:var(--ink-2);font-family:var(--body);font-weight:600}
 </style>
 
 <!-- ============ LOADER ============ -->
@@ -557,6 +606,7 @@ body{background:var(--bg)}
       <button id="rSearch" data-tip="Search" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
       <button id="rBrowse" data-tip="Browse townships" aria-label="Browse townships"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
       <button id="rLayers" data-tip="Layers &amp; legend" aria-label="Layers and legend" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
+      <button id="rSat" data-tip="Satellite on / off" aria-label="Satellite imagery" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4M4 17l8 4 8-4"/></svg></button>
       <button id="r360" data-tip="360° street view" aria-label="Try a 360 degree street view"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="8.5" ry="3.2"/></svg></button>
       <hr>
       <button id="zin" data-tip="Zoom in" aria-label="Zoom in"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -565,17 +615,19 @@ body{background:var(--bg)}
     </nav>
     <div class="layers" id="layers" hidden>
       <h4>Layers</h4>
+      <button class="tog" id="tSat" aria-pressed="true">Satellite imagery<i></i></button>
       <button class="tog" id="tLm" aria-pressed="true">Landmarks<i></i></button>
       <button class="tog" id="tBus" aria-pressed="true">Bus lines &amp; road names<i></i></button>
       <button class="tog" id="tRail" aria-pressed="true">Circular railway<i></i></button>
       <button class="tog" id="tJn" aria-pressed="true">Busy junctions<i></i></button>
       <button class="tog" id="tWater" aria-pressed="true">Lakes &amp; rivers<i></i></button>
       <h4>Colour map by</h4>
-      <div class="row" id="cmode"><button class="chip" data-mode="zone" aria-pressed="true">Price zone</button><button class="chip" data-mode="heat" aria-pressed="false">Available walls</button></div>
+      <div class="row" id="cmode"><button class="chip" data-mode="zone" aria-pressed="true">Price zone</button><button class="chip" data-mode="heat" aria-pressed="false">Available walls</button><button class="chip" data-mode="pop" aria-pressed="false">Population density</button></div>
       <h4>Legend</h4>
       <div class="legend" id="legend"></div>
     </div>
     <div class="statbar" id="statbar" aria-label="Catalog totals"></div>
+    <p class="satattr" id="satAttr"></p>
     <div class="controls">
       <label class="searchbox"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="Search township, wall ID or landmark" autocomplete="off" aria-label="Search township, wall ID or landmark"></label>
       <div class="results" id="results" hidden></div>
@@ -709,6 +761,16 @@ const CONFIG = {
   // Lakes (centre, size in metres, rotation) and river labels — approximate
   lakes: [ { name:'Inya Lake', lat:16.8355, lon:96.1455, w:1100, h:2600, rot:-12 }, { name:'Kandawgyi Lake', lat:16.7920, lon:96.1640, w:1500, h:700, rot:0 } ],
   rivers: [ { name:'Yangon River', lat:16.7620, lon:96.1700 }, { name:'Hlaing River', lat:16.8450, lon:96.0980 }, { name:'Pazundaung Creek', lat:16.7930, lon:96.1880 }, { name:'Bago River', lat:16.7650, lon:96.2350 } ],
+  // Population, 2014 Myanmar Population and Housing Census (via citypopulation.de)
+  population: {
+    'Kyauktada':29853,'Pabedan':33336,'Latha':25057,'Lanmadaw':47160,'Botahtaung':40995,'Pazundaung':48455,'Dagon':25082,'Seikkan':2826,
+    'Mingalartaungnyunt':132494,'Sanchaung':99619,'Kamaryut':84569,'Bahan':96732,'Ahlone':55482,'Kyeemyindaing':111514,'Hlaing':160307,'Yankin':70946,
+    'Tamwe':165313,'Mayangone':198113,'Thingangyun':209486,'South Okkalapa':161126,'Dawbon':75325,'Insein':305283,'North Okkalapa':333293,'Thaketa':220556,
+    'Dagon Myothit (East)':165628,'Dagon Myothit (North)':203948,'Dagon Myothit (Seikkan)':167448,'Dagon Myothit (South)':371646,
+    'Hlaingtharya':687867,'Shwepyithar':343526,'Mingaladon':331586,'Seikgyikanaungto':34003
+  },
+  // Satellite imagery tiles (loaded live). Attribution must stay visible.
+  satellite: { url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', maxZoom:18, attribution:'Imagery © Esri, Maxar, Earthstar Geographics, and the GIS User Community' },
   // General township profiles (descriptive, not measured data)
   profiles: {
     'Kyauktada':'Downtown business core: offices, banks and heritage streets with heavy weekday footfall.',
@@ -789,7 +851,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 const sess={get(){try{return sessionStorage.getItem('aw-session')}catch(e){return null}},set(v){try{v?sessionStorage.setItem('aw-session',v):sessionStorage.removeItem('aw-session')}catch(e){}}};
 let view='home', selected=null, zoneFilter=null, colorMode='zone', availOnly=false, sortBy='id', form={}, me=null;
 let shortlist=store.get('aw-list',[]).filter(s=>s.id.startsWith('REQ-')||wallById(s.id));
-let showLm=true, showBus=true, showRail=true, showJn=true, showWater=true;
+let showLm=true, showBus=true, showRail=true, showJn=true, showWater=true, showSat=true;
 
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2000)}
 
@@ -827,8 +889,8 @@ map.setAttribute('viewBox',`0 0 ${GEO.w} ${GEO.h}`);
 const el=(tag,attrs={})=>{const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e};
 const G=n=>{const g=el('g');g.id='g-'+n;return g};
 const gTs=G('ts'),gLbl=G('lbl'),gBus=G('bus'),gFx=G('fx'),gRoute=G('route'),gPins=G('pins'),gBadges=G('badges'),gLm=G('lm');
-const gWater=G('water'),gRail=G('rail'),gJn=G('jn');
-map.append(gTs,gWater,gRail,gBus,gLbl,gJn,gRoute,gLm,gFx,gPins,gBadges);
+const gWater=G('water'),gRail=G('rail'),gJn=G('jn'),gSat=G('sat'),gSatBase=el('g'),gSatHi=el('g'); gSat.append(gSatBase,gSatHi);
+map.append(gSat,gTs,gWater,gRail,gBus,gLbl,gJn,gRoute,gLm,gFx,gPins,gBadges);
 /* halftone dot patterns: dots keep the same on-screen size at every zoom */
 const PATS={pzA:'#F5B800',pzB:'#EE8A5C',pzC:'#8A93A8',ph0:'#4A5060',ph1:'#8C7230',ph2:'#D9A400',ph3:'#FFD447'};
 const patDefs=el('defs'); const patEls=[];
@@ -879,13 +941,18 @@ function bootApp(){
     t.rail=CONFIG.railway.some((p,i,arr)=>{if(i===arr.length-1) return false; const a1=P(p[0],p[1]),b1=P(arr[i+1][0],arr[i+1][1]); for(let f=0;f<=1;f+=.1){if(inT(a1[0]+(b1[0]-a1[0])*f,a1[1]+(b1[1]-a1[1])*f)) return true} return false});
     t.jns=CONFIG.junctions.filter(j=>inT(j.x,j.y)).length;
     t.lmn=CONFIG.landmarks.filter(l=>inT(...P(l.lat,l.lon))).length;
+    t.pop=CONFIG.population[t.name]||null; t.dens=t.pop?t.pop/t.area:null;
     t.el.setAttribute('aria-label',`${nice(t.name)}, zone ${t.zone}, ${wallsIn(t.name).length} walls, about ${t.area.toFixed(1)} square kilometres`)});
   CONFIG.landmarks.forEach(l=>{[l.x,l.y]=P(l.lat,l.lon); const g=el('g',{class:'lm'}); g.dataset.lm=l.name;
     const s=el('g'); s.append(el('circle',{class:'disc',cx:12,cy:12,r:13})); const gl=el('path',{class:'glyph',d:GLYPH[l.cat]||GLYPH.gov,'fill-rule':'evenodd'}); gl.setAttribute('transform','translate(4.8 4.8) scale(.6)'); s.append(gl);
     g.append(s); gLm.append(g); l.g=g; l.s=s;
     g.addEventListener('pointerenter',e=>showTip(e,l.name,CAT[l.cat])); g.addEventListener('pointerleave',hideTip)});
+  $('#satAttr').textContent=CONFIG.satellite.attribution;
   $('#sWalls').textContent=CONFIG.walls.length; $('#sAvail').textContent=CONFIG.walls.filter(w=>w.status==='Available').length; $('#sTs').textContent=GEO.townships.length;
   $('#listCount').textContent=shortlist.length;
+  const byPop=GEO.townships.filter(t=>t.pop).sort((a,b)=>b.pop-a.pop); byPop.forEach((t,i)=>t.popRank=i+1);
+  const dens=GEO.townships.filter(t=>t.dens).map(t=>t.dens).sort((a,b)=>a-b); const q=f=>dens[Math.floor((dens.length-1)*f)];
+  window.DQ=[q(.25),q(.5),q(.75)];
   map.classList.add('intro'); setTimeout(()=>map.classList.remove('intro'),2600);
   paint(); setVB({...full}); renderStats();
   const h=decodeURIComponent(location.hash.slice(1));
@@ -919,20 +986,21 @@ function setVB(v){
   vb=clampVB({...v}); map.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   const k=full.w/vb.w;
   patScale(k);
-  GEO.townships.forEach(t=>{t.lbl.style.fontSize=(11/k)+'px'; t.lbl.style.strokeWidth=(3/k)+'px'; t.lbl.style.display=(k>2.2||t.zone==='C'||t.name===selected)?'':'none';
-    if(t.badge){t.badge.c.setAttribute('r',7.5/k);t.badge.tx.style.fontSize=(9/k)+'px';t.badge.c.setAttribute('cy',t.cy+13/k);t.badge.tx.setAttribute('y',t.cy+13/k)}});
+  GEO.townships.forEach(t=>{t.lbl.style.fontSize=(9/k)+'px'; t.lbl.style.strokeWidth=(2.5/k)+'px'; t.lbl.style.display=(k>2.2||t.zone==='C'||t.name===selected)?'':'none';
+    if(t.badge){t.badge.c.setAttribute('r',6/k);t.badge.tx.style.fontSize=(7.5/k)+'px';t.badge.c.setAttribute('cy',t.cy+11/k);t.badge.tx.setAttribute('y',t.cy+11/k)}});
   const close=k>=2.6; gBadges.style.display=close?'none':''; gPins.style.display=close?'':'none';
-  gPins.querySelectorAll('circle').forEach(c=>c.setAttribute('r',3.8/k));
-  gRoute.querySelectorAll('.route-num circle').forEach(c=>c.setAttribute('r',7.5/k));
-  gRoute.querySelectorAll('.route-num text').forEach(t=>t.style.fontSize=(11/k)+'px');
-  const ls=Math.min(1.4,Math.max(.55,1.6/Math.sqrt(k)))/k*0.68; // landmark icon scale
+  gPins.querySelectorAll('circle').forEach(c=>c.setAttribute('r',3/k));
+  gRoute.querySelectorAll('.route-num circle').forEach(c=>c.setAttribute('r',6.5/k));
+  gRoute.querySelectorAll('.route-num text').forEach(t=>t.style.fontSize=(8.5/k)+'px');
+  const ls=Math.min(1.4,Math.max(.55,1.6/Math.sqrt(k)))/k*0.5; // landmark icon scale
   CONFIG.landmarks.forEach(l=>{if(l.s){l.s.setAttribute('transform',`translate(${l.x} ${l.y}) scale(${ls}) translate(-12 -12)`); l.g.style.display=showLm&&(k>1.25||['pagoda','air','stadium'].includes(l.cat))?'':'none'}});
   gBus.style.display=showBus?'':'none';
   gRail.style.display=showRail?'':'none'; gJn.style.display=showJn?'':'none'; gWater.style.display=showWater?'':'none';
-  gBus.querySelectorAll('.roadlbl').forEach(t=>{t.style.fontSize=(9/k)+'px'; t.style.strokeWidth=(3/k)+'px'; t.style.display=k>1.7?'':'none'});
-  gWater.querySelectorAll('.waterlbl').forEach(t=>{t.style.fontSize=(10/k)+'px'; t.style.strokeWidth=(3/k)+'px'});
-  CONFIG.junctions.forEach(j=>{if(!j.g) return; j.g.querySelector('.core').setAttribute('r',2.4/k); j.g.querySelector('.wave').setAttribute('r',2.4/k); j.g.style.display=k>1.3?'':'none'});
+  gBus.querySelectorAll('.roadlbl').forEach(t=>{t.style.fontSize=(7.5/k)+'px'; t.style.strokeWidth=(2.5/k)+'px'; t.style.display=k>1.7?'':'none'});
+  gWater.querySelectorAll('.waterlbl').forEach(t=>{t.style.fontSize=(8.5/k)+'px'; t.style.strokeWidth=(2.5/k)+'px'});
+  CONFIG.junctions.forEach(j=>{if(!j.g) return; j.g.querySelector('.core').setAttribute('r',1.9/k); j.g.querySelector('.wave').setAttribute('r',1.9/k); j.g.style.display=k>1.3?'':'none'});
   fxScale(k);
+  clearTimeout(satT); satT=setTimeout(satUpdate,90);
 }
 let animId=0;
 function animateTo(target,dur=480){
@@ -969,7 +1037,7 @@ map.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId); if(ptrs.size<2) p
 map.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);pinch=null;drag=null;map.classList.remove('drag')});
 map.addEventListener('wheel',e=>{e.preventDefault(); animId++; const p=map.createSVGPoint(); p.x=e.clientX;p.y=e.clientY; const pt=p.matrixTransform(map.getScreenCTM().inverse());
   const f=e.deltaY>0?1.15:.87, w=vb.w*f, h=w/(GEO.w/GEO.h); setVB({x:pt.x-(pt.x-vb.x)*(w/vb.w),y:pt.y-(pt.y-vb.y)*(h/vb.h),w})},{passive:false});
-gTs.addEventListener('pointermove',e=>{const n=e.target.dataset.n; if(n&&!drag){showTip(e,nice(n),`Zone ${zoneOf(n)} · ${wallsIn(n).length} walls · ${availIn(n)} available · ~${byName[n].area?byName[n].area.toFixed(1):'?'} km²`)}});
+gTs.addEventListener('pointermove',e=>{const n=e.target.dataset.n; if(n&&!drag){showTip(e,nice(n),`Zone ${zoneOf(n)} · ${wallsIn(n).length} walls · ${availIn(n)} available · ~${byName[n].area?byName[n].area.toFixed(1):'?'} km²${byName[n].pop?' · '+fmt(byName[n].pop)+' people':''}`)}});
 gTs.addEventListener('pointerleave',hideTip);
 gBus.addEventListener('pointermove',e=>{const b=e.target.dataset.bus; if(b) showTip(e,b,'Bus corridor (approximate)')});
 gBus.addEventListener('pointerleave',hideTip);
@@ -982,13 +1050,17 @@ function heatClass(n){const a=availIn(n); return a===0?'h0':a===1?'h1':a===2?'h2
 function paint(){
   document.querySelectorAll('.chip[data-z]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.z===zoneFilter));
   document.querySelectorAll('#cmode .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===colorMode));
+  $('#tSat').setAttribute('aria-pressed',showSat); $('#rSat').setAttribute('aria-pressed',showSat);
   $('#tLm').setAttribute('aria-pressed',showLm); $('#tBus').setAttribute('aria-pressed',showBus); $('#tRail').setAttribute('aria-pressed',showRail); $('#tJn').setAttribute('aria-pressed',showJn); $('#tWater').setAttribute('aria-pressed',showWater);
   $('#lyrLm').setAttribute('aria-pressed',showLm); $('#lyrBus').setAttribute('aria-pressed',showBus);
-  map.classList.toggle('heat',colorMode==='heat'); map.classList.toggle('focus',!!selected);
-  GEO.townships.forEach(t=>{t.el.classList.remove('h0','h1','h2','h3'); t.el.classList.add(heatClass(t.name));
+  map.classList.toggle('heat',colorMode==='heat'); map.classList.toggle('popmode',colorMode==='pop'); map.classList.toggle('focus',!!selected);
+  GEO.townships.forEach(t=>{t.el.classList.remove('h0','h1','h2','h3','p0','p1','p2','p3'); t.el.classList.add(heatClass(t.name)); if(t.dens&&window.DQ){t.el.classList.add(t.dens<DQ[0]?'p0':t.dens<DQ[1]?'p1':t.dens<DQ[2]?'p2':'p3')}
     t.el.classList.toggle('dim',!!zoneFilter&&t.zone!==zoneFilter); t.el.classList.toggle('sel',t.name===selected)});
   CONFIG.walls.forEach(w=>w.pin&&w.pin.classList.toggle('on',shortlist.some(s=>s.id===w.id)));
-  const base = colorMode==='zone'
+  const fmtK=n=>n>=1000?Math.round(n/1000)+'k':Math.round(n);
+  const base = colorMode==='pop'&&window.DQ
+    ? `<div class="row"><span><i style="background:rgba(130,150,255,.18)"></i>&lt;${fmtK(DQ[0])}</span><span><i style="background:rgba(130,150,255,.36)"></i>${fmtK(DQ[0])}–${fmtK(DQ[1])}</span><span><i style="background:rgba(150,130,255,.55)"></i>${fmtK(DQ[1])}–${fmtK(DQ[2])}</span><span><i style="background:rgba(190,120,255,.75)"></i>&gt;${fmtK(DQ[2])} people/km²</span></div>`
+    : colorMode==='zone'
     ? `<div class="row"><span><i style="background:var(--zA)"></i>A · City centre</span><span><i style="background:var(--zB)"></i>B · Inner residential</span><span><i style="background:var(--zC)"></i>C · Outer</span></div>`
     : `<div class="row"><span><i style="background:var(--h0)"></i>None yet</span><span><i style="background:var(--h1)"></i>1</span><span><i style="background:var(--h2)"></i>2</span><span><i style="background:var(--h3)"></i>3+ available</span></div>`;
   const bus = (showBus?`<div class="row">${CONFIG.busLines.map(b=>`<span><i class="ln" style="background:${b.color}"></i>${esc(b.name)}</span>`).join('')}</div>`:'')+`<div class="row">${showRail?'<span><i class="ln" style="background:repeating-linear-gradient(90deg,#D8D2C4 0 5px,transparent 5px 8px)"></i>Circular railway</span>':''}${showJn?'<span><i style="background:#EEEAE0;border-radius:50%;width:9px;height:9px"></i>Busy junction</span>':''}${showWater?'<span><i style="background:#16314A;border:1px solid #2B5578"></i>Lake / river</span>':''}</div>`;
@@ -1002,9 +1074,38 @@ function drawRoute(){
 }
 document.querySelectorAll('.chip[data-z]').forEach(c=>c.onclick=()=>{zoneFilter=zoneFilter===c.dataset.z?null:c.dataset.z; paint(); if(view==='home') renderHome()});
 document.querySelectorAll('#cmode .chip').forEach(b=>b.onclick=()=>{colorMode=b.dataset.mode; paint()});
+$('#tSat').onclick=$('#rSat').onclick=()=>{showSat=!showSat;paint();satUpdate()};
 $('#tRail').onclick=()=>{showRail=!showRail;paint()}; $('#tJn').onclick=()=>{showJn=!showJn;paint()}; $('#tWater').onclick=()=>{showWater=!showWater;paint()};
 $('#lyrLm').onclick=$('#tLm').onclick=()=>{showLm=!showLm;paint()}; $('#lyrBus').onclick=$('#tBus').onclick=()=>{showBus=!showBus;paint()};
 
+
+
+/* ---------- satellite tiles (Web Mercator tiles placed onto the map projection) ---------- */
+let satT=0; const satCache=new Map(); let satBaseDone=false;
+const t2lon=(x,z)=>x/2**z*360-180, t2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/2**z;return 180/Math.PI*Math.atan(Math.sinh(n))};
+const lon2t=(lon,z)=>(lon+180)/360*2**z, lat2t=(lat,z)=>{const r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z};
+const unP=(x,y)=>{const p=GEO.proj;return [p.maxy-(y-p.pad)/p.sx, p.minx+(x-p.pad)/(p.k*p.sx)]};
+function satTile(z,x,y,parent){const key=z+'/'+x+'/'+y; if(satCache.has(key)) return satCache.get(key);
+  const [x1,y1]=P(t2lat(y,z),t2lon(x,z)), [x2,y2]=P(t2lat(y+1,z),t2lon(x+1,z)), o=.15;
+  const im=el('image',{x:x1-o,y:y1-o,width:x2-x1+2*o,height:y2-y1+2*o,preserveAspectRatio:'none'});
+  im.setAttribute('href',CONFIG.satellite.url.replace('{z}',z).replace('{x}',x).replace('{y}',y)); im.style.opacity=0;
+  im.addEventListener('load',()=>{im.style.opacity=1}); parent.append(im); satCache.set(key,im); return im}
+function satRange(z,latT,lonL,latB,lonR){return [Math.floor(lon2t(lonL,z)),Math.floor(lon2t(lonR,z)),Math.floor(lat2t(latT,z)),Math.floor(lat2t(latB,z))]}
+function satUpdate(){
+  gSat.style.display=showSat?'':'none'; $('#stage').classList.toggle('sat',showSat); $('#satAttr').hidden=!showSat; if(!showSat) return;
+  const [aT,oL]=unP(0,0),[aB,oR]=unP(GEO.w,GEO.h);
+  if(!satBaseDone){const [x0,x1,y0,y1]=satRange(12,aT,oL,aB,oR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(12,x,y,gSatBase); satBaseDone=true}
+  const sc=Math.min(map.clientWidth/vb.w,map.clientHeight/vb.h)||1, mpp=M_PER_UNIT/sc;
+  let z=Math.round(Math.log2(149900/mpp)); z=Math.max(13,Math.min(CONFIG.satellite.maxZoom,z));
+  const cw=map.clientWidth/sc, ch=map.clientHeight/sc, X0=vb.x+vb.w/2-cw/2, Y0=vb.y+vb.h/2-ch/2;
+  const [lT,lL]=unP(Math.max(0,X0),Math.max(0,Y0)), [lB,lR]=unP(Math.min(GEO.w,X0+cw),Math.min(GEO.h,Y0+ch));
+  let [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR);
+  while((x1-x0+1)*(y1-y0+1)>140&&z>13){z--; [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR)}
+  const need=new Set(); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){need.add(z+'/'+x+'/'+y); satTile(z,x,y,gSatHi)}
+  for(const [k,im] of satCache){ if(im.parentNode===gSatHi && !need.has(k)){ if(!k.startsWith(z+'/')){im.remove(); satCache.delete(k)} } }
+  if(satCache.size>420){for(const [k,im] of satCache){if(im.parentNode===gSatHi&&!need.has(k)){im.remove();satCache.delete(k)} if(satCache.size<300)break}}
+}
+addEventListener('resize',()=>{clearTimeout(satT); satT=setTimeout(satUpdate,150)});
 
 /* ---------- v4: panel, rail, stats ---------- */
 const drawerEl=$('#drawer');
@@ -1034,7 +1135,7 @@ document.body.append(dialDefs);
 let fxEls=null;
 function fxScale(k){
   if(!fxEls) return;
-  fxEls.halo.setAttribute('stroke-width',14/k); fxEls.edge.setAttribute('stroke-width',3/k);
+  fxEls.halo.setAttribute('stroke-width',10/k); fxEls.edge.setAttribute('stroke-width',2.2/k);
   const b=document.getElementById('glowBlur'); if(b) b.setAttribute('stdDeviation',7/k);
   fxEls.beacons.forEach(g=>g.setAttribute('transform',`translate(${g.dataset.x} ${g.dataset.y}) scale(${1/k})`));
 }
@@ -1053,12 +1154,12 @@ function reveal(n){
     const ok=w.status==='Available', g=el('g',{class:'beacon'+(ok?'':' busy')}); g.dataset.x=w.x; g.dataset.y=w.y; g.dataset.id=w.id;
     const d=(0.75+i*0.15)+'s';
     const pop=el('g',{class:'pop'}); pop.style.setProperty('--d',d);
-    if(ok){const r1=el('circle',{class:'ring',r:9}), r2=el('circle',{class:'ring r2',r:9}); r1.style.animationDelay=`calc(${d} + .3s)`; r2.style.animationDelay=`calc(${d} + 1.6s)`; pop.append(r1,r2)}
-    pop.append(el('circle',{class:'core',r:9}));
+    if(ok){const r1=el('circle',{class:'ring',r:7}), r2=el('circle',{class:'ring r2',r:7}); r1.style.animationDelay=`calc(${d} + .3s)`; r2.style.animationDelay=`calc(${d} + 1.6s)`; pop.append(r1,r2)}
+    pop.append(el('circle',{class:'core',r:7}));
     const num=el('text',{class:'num',y:1}); num.textContent=i+1; pop.append(num);
-    const label=`${w.id} · ${ok?'Available':w.status}${w.pano?' · 360°':''}`; const tw=label.length*6.6+16;
-    const tag=el('g',{class:'tag',transform:'translate(14 -11)'}); tag.append(el('rect',{width:tw,height:22,rx:11}));
-    const tx=el('text',{x:10,y:15,class:ok?'ok':''}); tx.textContent=label; tag.append(tx); pop.append(tag);
+    const label=`${w.id} · ${ok?'Available':w.status}${w.pano?' · 360°':''}`; const tw=label.length*5.6+14;
+    const tag=el('g',{class:'tag',transform:'translate(11 -9)'}); tag.append(el('rect',{width:tw,height:18,rx:9}));
+    const tx=el('text',{x:8,y:12.5,class:ok?'ok':''}); tx.textContent=label; tag.append(tx); pop.append(tag);
     g.append(pop); gFx.append(g); beacons.push(g);
     g.addEventListener('pointerenter',e=>showTip(e,w.spot,`${w.id} · ${w.size}`)); g.addEventListener('pointerleave',hideTip);
   });
@@ -1067,7 +1168,7 @@ function reveal(n){
   if(reduced){[spot,halo,edge].forEach(x=>x.classList.add('on'))}
   const ws=wallsIn(n), total=ws.length, av=availIn(n), fx=$('#fx'), C=2*Math.PI*30;
   fx.innerHTML=`<div class="dial"><svg viewBox="0 0 72 72"><circle class="trk" cx="36" cy="36" r="30"/><circle class="arc" id="fxArc" cx="36" cy="36" r="30" pathLength="1"/></svg><div class="num" id="fxNum">0</div></div>
-    <div class="t"><small>Zone ${t.zone} · ${CONFIG.zones[t.zone].tier}</small><b>${esc(nice(n))}</b><span>${total} wall${total===1?'':'s'} listed · ${av} available now</span>
+    <div class="t"><small>Zone ${t.zone} · ${CONFIG.zones[t.zone].tier}</small><b>${esc(nice(n))}</b><span>${total} wall${total===1?'':'s'} listed · ${av} available now${t.pop?` · ${fmt(t.pop)} people`:''}</span>
     <div class="dots">${ws.map((w,i)=>`<i class="${w.status==='Available'?'':'busy'}" style="animation-delay:${0.75+i*0.15}s"></i>`).join('')||'<span style="font-size:12px;color:#C9C4B8">No walls yet · request a survey</span>'}</div></div>`;
   fx.classList.remove('show'); void fx.offsetWidth; fx.classList.add('show');
   requestAnimationFrame(()=>requestAnimationFrame(()=>{const a=$('#fxArc'); if(a) a.style.strokeDashoffset=1-(total?av/total:0)}));
@@ -1136,6 +1237,7 @@ function renderTownship(n){
     <div class="crumbs"><button class="back" id="back">← All townships</button><div class="stepper"><button id="prevT" aria-label="Previous township">‹</button><button id="nextT" aria-label="Next township">›</button></div></div>
     <div style="display:grid;gap:10px"><span class="zpill" style="background:var(--z${t.zone})">Zone ${t.zone} · ${Z.tier}</span><h2>${esc(nice(n))}</h2><p class="muted">${Z.name} · ${total} walls listed · ${availIn(n)} available</p>${CONFIG.profiles[n]?`<p class="tprof">${esc(CONFIG.profiles[n])}</p>`:''}</div>
     <div class="facts"><div><span>Traffic</span><b>${esc(Z.traffic)}</b></div><div><span>POV</span><b>${esc(Z.pov)}</b></div><div><span>Zone price</span><b>${price(t.zone)}</b></div><div><span>Benefit</span><b>${esc(Z.benefit)}</b></div></div>
+    ${t.pop?`<div class="popcard"><div><span>Population · 2014 census</span><b>${fmt(t.pop)}</b></div><div><span>Density (approx.)</span><b>${fmt(t.dens)}<small> /km²</small></b></div><div><span>Rank</span><b>#${t.popRank}<small> of 32</small></b></div></div>`:''}
     <div style="display:grid;gap:8px"><p class="eyebrow">City data</p>
       <div class="cityfacts"><div><b>${t.area.toFixed(1)}</b><span>km² (approx.)</span></div><div><b>${t.buses.length}</b><span>Bus corridors</span></div><div><b>${t.jns}</b><span>Busy junctions</span></div>
       <div><b>${t.lmn}</b><span>Landmarks</span></div><div><b>${t.rail?'Yes':'No'}</b><span>Circular railway</span></div><div><b>${total?((total/t.area)<1?(total/t.area).toFixed(2):(total/t.area).toFixed(1)):'0'}</b><span>Walls per km²</span></div></div>
