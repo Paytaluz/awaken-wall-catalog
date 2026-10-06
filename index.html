@@ -114,6 +114,7 @@ p{margin:0}
 .lm .glyph{fill:var(--ink)}
 .lm:hover .disc{fill:var(--sun)}
 /* selection: spotlight, glowing edge, wall beacons */
+.spot,.halo,.edge,.sheen{pointer-events:none}
 .spot{fill:var(--spot);opacity:0;transition:opacity .6s ease}
 .spot.on{opacity:1}
 .halo{fill:none;stroke:var(--sun);stroke-linejoin:round;opacity:.0;transition:opacity .8s ease .5s}
@@ -227,6 +228,13 @@ p{margin:0}
 .wcard .ph:hover img{transform:scale(1.04)}
 .wcard .meta{display:grid;gap:1px;font-size:13px}
 .wcard .meta b{font-size:14px}
+.v360{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;background:var(--ink);color:var(--sun);padding:6px 12px;border-radius:999px;justify-self:start}
+.v360:hover{background:var(--brick);color:#fff}
+.v360 .ico{width:14px;height:14px;border-radius:50%;border:2px solid currentColor;position:relative}
+.v360 .ico::after{content:"";position:absolute;left:-4px;right:-4px;top:4px;height:2px;border-radius:2px;background:currentColor}
+.feat{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:#17181C;color:#F2EEE5;border-radius:12px;padding:16px;background-image:radial-gradient(circle at 110% 120%,rgba(245,184,0,.35),transparent 55%)}
+.feat > div{display:grid;gap:4px}.feat b{font-family:var(--display);text-transform:uppercase;font-size:19px}.feat span{font-size:13px;color:#C9C4B8}
+@media (max-width:420px){.feat{grid-template-columns:1fr}}
 .wcard .add{all:unset;cursor:pointer;font-size:13px;font-weight:700;color:var(--brick)}
 .wcard .add[aria-pressed="true"]{color:var(--ok)}
 .wcard .add[disabled]{color:var(--ink-2);cursor:not-allowed}
@@ -421,13 +429,13 @@ const CONFIG = {
         audience:{ 'Residents':45, 'Shoppers':30, 'Students':15, 'Commuters':10 },
         nearby:['Sanchaung market · 50 m','Bus stop · 120 m','Primary school · 300 m'],
         owner:'Agreement signed', permit:'Ward office notified', availableFrom:'1 Nov 2026', minPeriod:'1 month', updated:'6 Oct 2026' } },
-    { id:'SAN-002', township:'Sanchaung', spot:'Bus stop side wall',   size:'5 × 2.5 m', traffic:'High day · High night',    pov:'Seen while waiting',            status:'Available', photos:[] },
-    { id:'KMY-001', township:'Kamaryut',  spot:'Opposite school gate', size:'10 × 3 m',  traffic:'Very high mornings',       pov:'Across a two-lane street',      status:'Booked',    photos:[] },
-    { id:'KMY-002', township:'Kamaryut',  spot:'Tea shop corner',      size:'4 × 3 m',   traffic:'Medium day · High night',  pov:'Seated customers face it',      status:'Available', photos:[] },
-    { id:'TMW-001', township:'Tamwe',     spot:'Housing lane exit',    size:'6 × 3 m',   traffic:'Residents twice daily',    pov:'Walking pace, close',           status:'Available', photos:[] },
-    { id:'HLG-001', township:'Hlaing',    spot:'Mobile shop strip',    size:'6 × 2.5 m', traffic:'High day · High night',    pov:'Eye level from shop row',       status:'Available', photos:[] },
-    { id:'LTA-001', township:'Latha',     spot:'Night market lane',    size:'7 × 3 m',   traffic:'Very high evenings',       pov:'Crowded walking street',        status:'Available', photos:[] },
-    { id:'INS-001', township:'Insein',    spot:'Market rear wall',     size:'12 × 3 m',  traffic:'High day',                 pov:'Seen from bus stop',            status:'Available', photos:[] },
+    { id:'SAN-002', township:'Sanchaung', spot:'Bus stop side wall',   size:'5 × 2.5 m', traffic:'High day · High night',    pov:'Seen while waiting',            status:'Available', photos:[], pano:'demo' },
+    { id:'KMY-001', township:'Kamaryut',  spot:'Opposite school gate', size:'10 × 3 m',  traffic:'Very high mornings',       pov:'Across a two-lane street',      status:'Booked',    photos:[], pano:'demo' },
+    { id:'KMY-002', township:'Kamaryut',  spot:'Tea shop corner',      size:'4 × 3 m',   traffic:'Medium day · High night',  pov:'Seated customers face it',      status:'Available', photos:[], pano:'demo' },
+    { id:'TMW-001', township:'Tamwe',     spot:'Housing lane exit',    size:'6 × 3 m',   traffic:'Residents twice daily',    pov:'Walking pace, close',           status:'Available', photos:[], pano:'demo' },
+    { id:'HLG-001', township:'Hlaing',    spot:'Mobile shop strip',    size:'6 × 2.5 m', traffic:'High day · High night',    pov:'Eye level from shop row',       status:'Available', photos:[], pano:'demo' },
+    { id:'LTA-001', township:'Latha',     spot:'Night market lane',    size:'7 × 3 m',   traffic:'Very high evenings',       pov:'Crowded walking street',        status:'Available', photos:[], pano:'demo' },
+    { id:'INS-001', township:'Insein',    spot:'Market rear wall',     size:'12 × 3 m',  traffic:'High day',                 pov:'Seen from bus stop',            status:'Available', photos:[], pano:'demo' },
     { id:'NOK-001', township:'North Okkalapa', spot:'Factory road bend', size:'9 × 3 m', traffic:'Shift changes',            pov:'Slow traffic, long view',       status:'Available', photos:[] }
   ],
   // Landmarks — approximate positions; adjust lat/lon as needed.
@@ -594,17 +602,18 @@ function setVB(v){
   gBus.style.display=showBus?'':'none';
   fxScale(k);
 }
+let animId=0;
 function animateTo(target,dur=480){
-  target=clampVB({...target}); const from={...vb}, t0=performance.now(); if(reduced) dur=0;
-  const step=now=>{const p=dur?Math.min(1,(now-t0)/dur):1, e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  target=clampVB({...target}); const from={...vb}, t0=performance.now(); if(reduced) dur=0; const id=++animId;
+  const step=now=>{if(id!==animId) return;const p=dur?Math.min(1,(now-t0)/dur):1, e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
     setVB({x:from.x+(target.x-from.x)*e,y:from.y+(target.y-from.y)*e,w:from.w+(target.w-from.w)*e}); if(p<1) requestAnimationFrame(step)};
   requestAnimationFrame(step);
 }
 function flyTo(target){ // zooms out slightly mid-flight, then settles in
-  target=clampVB({...target}); const from={...vb}, t0=performance.now(), dur=reduced?0:1050;
+  target=clampVB({...target}); const from={...vb}, t0=performance.now(), dur=reduced?0:1050; const id=++animId;
   const dist=Math.hypot((target.x+target.w/2)-(from.x+from.w/2),(target.y+target.h/2)-(from.y+from.h/2));
   const bump=Math.min(full.w*.5,dist*.9);
-  const step=now=>{const p=dur?Math.min(1,(now-t0)/dur):1, e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+  const step=now=>{if(id!==animId) return; const p=dur?Math.min(1,(now-t0)/dur):1, e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
     const w=from.w+(target.w-from.w)*e+bump*Math.sin(Math.PI*e)*.6, h=w/(GEO.w/GEO.h);
     const cx=from.x+from.w/2+((target.x+target.w/2)-(from.x+from.w/2))*e, cy=from.y+from.h/2+((target.y+target.h/2)-(from.y+from.h/2))*e;
     setVB({x:cx-w/2,y:cy-h/2,w}); if(p<1) requestAnimationFrame(step)};
@@ -619,14 +628,14 @@ map.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,e); map.setPointerCa
   drag={x:e.clientX,y:e.clientY,vb:{...vb}};moved=false});
 map.addEventListener('pointermove',e=>{ if(ptrs.has(e.pointerId)) ptrs.set(e.pointerId,e);
   if(pinch&&ptrs.size===2){const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY); const w=pinch.vb.w*pinch.d/d; const cx=pinch.vb.x+pinch.vb.w/2, cy=pinch.vb.y+pinch.vb.h/2; setVB({x:cx-w/2,y:cy-w/(GEO.w/GEO.h)/2,w}); return}
-  if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(Math.abs(dx)+Math.abs(dy)>4){moved=true;map.classList.add('drag');hideTip()}
+  if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; if(!moved&&Math.abs(dx)+Math.abs(dy)>6){moved=true;animId++;drag.vb={...vb};drag.x=e.clientX;drag.y=e.clientY;map.classList.add('drag');hideTip();return}
   if(moved){const s=Math.max(vb.w/map.clientWidth,vb.h/map.clientHeight); setVB({x:drag.vb.x-dx*s,y:drag.vb.y-dy*s,w:drag.vb.w})}});
 map.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId); if(ptrs.size<2) pinch=null;
-  if(drag&&!moved){const t=document.elementFromPoint(e.clientX,e.clientY); const pin=t?.closest?.('.pin')||t?.closest?.('.beacon'), bd=t?.closest?.('.badge-g'), rn=t?.closest?.('.route-num'), lm=t?.closest?.('.lm');
-    if(pin) openWall(pin.dataset.id); else if(rn) openWall(rn.dataset.id); else if(lm) openLandmark(lm.dataset.lm); else if(bd) select(bd.dataset.n,true); else if(t?.dataset?.n) select(t.dataset.n,true)}
+  if(drag&&!moved){const t=[...document.elementsFromPoint(e.clientX,e.clientY)].find(x=>!x.matches?.('.spot,.halo,.edge,.sheen,svg,#g-fx')); const pin=t?.closest?.('.pin')||t?.closest?.('.beacon'), bd=t?.closest?.('.badge-g'), rn=t?.closest?.('.route-num'), lm=t?.closest?.('.lm');
+    if(pin) openWall(pin.dataset.id,pin.classList.contains('beacon')?'360':undefined); else if(rn) openWall(rn.dataset.id); else if(lm) openLandmark(lm.dataset.lm); else if(bd) select(bd.dataset.n,true); else if(t?.dataset?.n) select(t.dataset.n,true)}
   drag=null; map.classList.remove('drag')});
 map.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);pinch=null;drag=null;map.classList.remove('drag')});
-map.addEventListener('wheel',e=>{e.preventDefault(); const p=map.createSVGPoint(); p.x=e.clientX;p.y=e.clientY; const pt=p.matrixTransform(map.getScreenCTM().inverse());
+map.addEventListener('wheel',e=>{e.preventDefault(); animId++; const p=map.createSVGPoint(); p.x=e.clientX;p.y=e.clientY; const pt=p.matrixTransform(map.getScreenCTM().inverse());
   const f=e.deltaY>0?1.15:.87, w=vb.w*f, h=w/(GEO.w/GEO.h); setVB({x:pt.x-(pt.x-vb.x)*(w/vb.w),y:pt.y-(pt.y-vb.y)*(h/vb.h),w})},{passive:false});
 gTs.addEventListener('pointermove',e=>{const n=e.target.dataset.n; if(n&&!drag){showTip(e,nice(n),`Zone ${zoneOf(n)} · ${wallsIn(n).length} walls · ${availIn(n)} available`)}});
 gTs.addEventListener('pointerleave',hideTip);
@@ -696,7 +705,7 @@ function reveal(n){
     if(ok){const r1=el('circle',{class:'ring',r:11}), r2=el('circle',{class:'ring r2',r:11}); r1.style.animationDelay=`calc(${d} + .3s)`; r2.style.animationDelay=`calc(${d} + 1.6s)`; pop.append(r1,r2)}
     pop.append(el('circle',{class:'core',r:11}));
     const num=el('text',{class:'num',y:1}); num.textContent=i+1; pop.append(num);
-    const label=`${w.id} · ${ok?'Available':w.status}`; const tw=label.length*6.6+16;
+    const label=`${w.id} · ${ok?'Available':w.status}${w.pano?' · 360°':''}`; const tw=label.length*6.6+16;
     const tag=el('g',{class:'tag',transform:'translate(16 -11)'}); tag.append(el('rect',{width:tw,height:22,rx:11}));
     const tx=el('text',{x:10,y:15,class:ok?'ok':''}); tx.textContent=label; tag.append(tx); pop.append(tag);
     g.append(pop); gFx.append(g); beacons.push(g);
@@ -745,9 +754,11 @@ function renderHome(){
     <p class="muted">Every wall is photographed, measured and priced by zone. Select a township on the map, browse photos and 360° views, and add walls to your list to build a route.</p></div>
     <div class="zonecards">${['A','B','C'].map(z=>{const Z=CONFIG.zones[z]; const ts=GEO.townships.filter(t=>t.zone===z); const nw=ts.reduce((s,t)=>s+wallsIn(t.name).length,0);
       return `<button class="zc" data-z="${z}" aria-pressed="${zoneFilter===z}"><i style="background:var(--z${z})"></i><span><b>Zone ${z} · ${Z.name}</b><span class="muted" style="display:block;font-size:13px">${ts.length} townships · ${nw} walls · ${esc(Z.benefit)}</span></span><em>${price(z)}<br><span class="muted" style="font-weight:500">/ wall / month</span></em></button>`}).join('')}</div>
+    <div class="feat"><div><p class="eyebrow" style="color:#F5B800">360° street views</p><b>Stand in front of any wall</b><span>Every wall has a 360° view. Look around the street, check sight lines, and preview it on desktop or phone.</span></div><button class="btn btn-sun btn-sm" id="try360" type="button">Try 360° view</button></div>
     <div style="display:grid;gap:10px"><p class="eyebrow">${zoneFilter?'Zone '+zoneFilter+' townships':'All townships A–Z'}</p>
     <div class="az">${list.map(t=>{const n=wallsIn(t.name).length;return `<button data-n="${esc(t.name)}"><i style="background:var(--z${t.zone})"></i>${esc(nice(t.name))}${n?` <small>${n}</small>`:''}</button>`}).join('')}</div></div>`;
   $('#dpad').querySelectorAll('.az button').forEach(b=>b.onclick=()=>select(b.dataset.n,true));
+  $('#try360').onclick=()=>{select('Sanchaung',true); setTimeout(()=>openWall('SAN-001','360'),700)};
   $('#dpad').querySelectorAll('.zc').forEach(c=>c.onclick=()=>{zoneFilter=zoneFilter===c.dataset.z?null:c.dataset.z;paint();renderHome();
     if(zoneFilter){const bb=GEO.townships.filter(t=>t.zone===zoneFilter).map(t=>t.el.getBBox()); const x=Math.min(...bb.map(b=>b.x)),y=Math.min(...bb.map(b=>b.y)); animateTo(fitBox({x,y,width:Math.max(...bb.map(b=>b.x+b.width))-x,height:Math.max(...bb.map(b=>b.y+b.height))-y},1.15))} else animateTo({...full})});
 }
@@ -778,6 +789,7 @@ function renderTownship(n){
       <span class="sample">Sample listings</span>
       ${ws.length?`<div class="walls">${ws.map(w=>`<div class="wcard"><button class="ph" data-id="${w.id}" aria-label="Open ${esc(w.spot)}"><img src="${photoFor(w)}" alt="${esc(w.spot)} in ${esc(nice(n))}" loading="lazy"><span class="status ${w.status==='Available'?'ok':''}">${esc(w.status)}</span>${w.pano?'<span class="p360">360°</span>':''}<span class="nphotos">${nPhotos(w)} photos</span></button>
         <div class="meta"><b>${esc(w.spot)}</b><span class="muted">${w.id} · ${esc(w.size)}${w.detail?' · full data':''}</span></div>
+        ${w.pano?`<button class="v360" data-id="${w.id}" type="button"><span class="ico"></span>View 360°</button>`:''}
         <button class="add" data-id="${w.id}" aria-pressed="${inList(w.id)}" ${w.status!=='Available'?'disabled':''}>${w.status!=='Available'?'Booked':inList(w.id)?'✓ In My walls':'+ Add to My walls'}</button></div>`).join('')}</div>`
       :`<div class="empty">No available walls here right now.</div>`}`
     :`<div class="empty"><span>Our scouts haven't listed walls in ${esc(nice(n))} yet. Ask us to survey it and we'll send photos.</span><button class="btn btn-line" id="reqT" type="button" style="justify-self:start">${inList('REQ-'+n)?'✓ Survey requested':'Request a survey here'}</button></div>`}`;
@@ -785,6 +797,7 @@ function renderTownship(n){
   $('#prevT').onclick=()=>select(sorted[(idx-1+sorted.length)%sorted.length].name,true);
   $('#nextT').onclick=()=>select(sorted[(idx+1)%sorted.length].name,true);
   $('#dpad').querySelectorAll('.ph').forEach(b=>b.onclick=()=>openWall(b.dataset.id));
+  $('#dpad').querySelectorAll('.v360').forEach(b=>b.onclick=()=>openWall(b.dataset.id,'360'));
   $('#dpad').querySelectorAll('.add').forEach(b=>b.onclick=()=>{toggleList(b.dataset.id);renderTownship(n)});
   const ao=$('#availOnly'); if(ao) ao.onchange=()=>{availOnly=ao.checked;renderTownship(n)};
   const sb=$('#sortBy'); if(sb) sb.onchange=()=>{sortBy=sb.value;renderTownship(n)};
@@ -903,8 +916,8 @@ function renderAdmin(){
 
 /* =================== WALL DETAIL LIGHTBOX =================== */
 let gi=0, lbWall=null, mtab='photos', pano=null;
-function openWall(id){
-  const w=wallById(id); if(!w) return; lbWall=w; gi=0; mtab=w.pano?'360':'photos';
+function openWall(id,tab){
+  const w=wallById(id); if(!w) return; lbWall=w; gi=0; mtab=tab||(w.pano?'360':'photos');
   if(selected!==w.township){selected=w.township;paint();renderTownship(w.township);reveal(w.township)}
   drawLB(); $('#lb').hidden=false; $('#lbClose').focus();
 }
@@ -940,7 +953,7 @@ function drawLB(){
       <dt>Nearby</dt><dd>${d.nearby.map(esc).join('<br>')}</dd><dt>Owner</dt><dd>${esc(d.owner)}</dd><dt>Permit</dt><dd>${esc(d.permit)}</dd><dt>Available from</dt><dd>${esc(d.availableFrom)} · min. ${esc(d.minPeriod)}</dd><dt>Zone price</dt><dd>${price(z)} / month</dd><dt>Data updated</dt><dd>${esc(d.updated)}</dd></dl>`
    : `<span class="zpill" style="background:var(--z${z})">Zone ${z} · ${esc(nice(w.township))}</span><h2 style="font-size:28px">${esc(w.spot)}</h2>
     <dl><dt>Wall ID</dt><dd>${w.id}</dd><dt>Size</dt><dd>${esc(w.size)}</dd><dt>Traffic</dt><dd>${esc(w.traffic)}</dd><dt>POV</dt><dd>${esc(w.pov)}</dd><dt>Status</dt><dd>${esc(w.status)}</dd><dt>Zone price</dt><dd>${price(z)} / month</dd></dl>
-    <p class="note">Full traffic data and 360° view are added after our team surveys this wall.</p>`;
+    <p class="note">Detailed traffic data is added after our team surveys this wall.</p>`;
   $('#lbox').innerHTML=`<div class="media">${tabs}${media}</div><div class="linfo">${info}
     <div class="actions"><button class="btn ${on?'btn-line':'btn-sun'}" id="addW" type="button" ${ok?'':'disabled'}>${!ok?'Currently booked':on?'✓ In My walls':'Add to My walls'}</button><button class="btn btn-line" id="seeW" type="button">Show on map</button></div>
     ${(w.photos||[]).length?'':'<span class="sample">Placeholder photos</span>'}</div>`;
