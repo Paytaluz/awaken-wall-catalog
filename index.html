@@ -337,10 +337,28 @@ body{background:var(--bg)}
   linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/64px 64px,
   var(--bg)}
 .ts{stroke:var(--land-stroke);stroke-width:.8}
-.ts.zA{fill:url(#pzA)} .ts.zB{fill:url(#pzB)} .ts.zC{fill:url(#pzC)}
-.heat .ts.h0{fill:url(#ph0)} .heat .ts.h1{fill:url(#ph1)} .heat .ts.h2{fill:url(#ph2)} .heat .ts.h3{fill:url(#ph3)}
-.ts:hover{opacity:1;filter:brightness(1.55)}
-.ts.sel{stroke:var(--sun);stroke-width:1.5;filter:brightness(1.7) saturate(1.2)}
+.ts{stroke:rgba(255,255,255,.22);stroke-width:.9}
+.ts.zA{fill:rgba(245,184,0,.36)} .ts.zB{fill:rgba(238,138,92,.32)} .ts.zC{fill:rgba(138,147,168,.20)}
+.heat .ts.h0{fill:rgba(90,96,112,.16)} .heat .ts.h1{fill:rgba(170,130,40,.40)} .heat .ts.h2{fill:rgba(225,170,0,.52)} .heat .ts.h3{fill:rgba(255,212,71,.66)}
+.ts:hover{opacity:1;filter:brightness(1.35)}
+.ts.sel{stroke:var(--sun);stroke-width:1.5;filter:brightness(1.45)}
+/* city layers */
+.lake{fill:#16314A;stroke:#2B5578;stroke-width:1;vector-effect:non-scaling-stroke}
+.waterlbl{fill:#6FA3C9;font-style:italic;font-weight:600;letter-spacing:0;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#0B0D12}
+.rail-bed{fill:none;stroke:#0B0D12;stroke-width:6;vector-effect:non-scaling-stroke}
+.rail-line{fill:none;stroke:#D8D2C4;stroke-width:2.2;vector-effect:non-scaling-stroke;stroke-dasharray:7 4}
+.roadlbl{font-weight:700;letter-spacing:0;pointer-events:none;paint-order:stroke;stroke:#0B0D12;stroke-linejoin:round}
+.jn{cursor:pointer}
+.jn .core{fill:#EEEAE0;stroke:#0B0D12;stroke-width:1.5;vector-effect:non-scaling-stroke}
+.jn .wave{fill:none;stroke:#EEEAE0;stroke-width:1.2;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;animation:jnw 2.8s ease-out infinite;opacity:0}
+@keyframes jnw{0%{transform:scale(1);opacity:.7}100%{transform:scale(3);opacity:0}}
+.cityfacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cityfacts div{border:1px solid var(--glass-line);border-radius:10px;padding:10px;display:grid;gap:2px;background:rgba(255,255,255,.03)}
+.cityfacts b{font-family:var(--display);font-size:22px;font-weight:600;line-height:1}
+.cityfacts span{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+.buschips{display:flex;flex-wrap:wrap;gap:6px}
+.buschips span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--glass-line)}
+.buschips i{width:14px;height:4px;border-radius:2px}
 .ts.dim{opacity:.18}
 .intro .ts{animation:tsIn .9s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--i,0s)}
 @keyframes tsIn{from{opacity:0}}
@@ -536,7 +554,10 @@ body{background:var(--bg)}
     <div class="layers" id="layers" hidden>
       <h4>Layers</h4>
       <button class="tog" id="tLm" aria-pressed="true">Landmarks<i></i></button>
-      <button class="tog" id="tBus" aria-pressed="true">Bus lines<i></i></button>
+      <button class="tog" id="tBus" aria-pressed="true">Bus lines &amp; road names<i></i></button>
+      <button class="tog" id="tRail" aria-pressed="true">Circular railway<i></i></button>
+      <button class="tog" id="tJn" aria-pressed="true">Busy junctions<i></i></button>
+      <button class="tog" id="tWater" aria-pressed="true">Lakes &amp; rivers<i></i></button>
       <h4>Colour map by</h4>
       <div class="row" id="cmode"><button class="chip" data-mode="zone" aria-pressed="true">Price zone</button><button class="chip" data-mode="heat" aria-pressed="false">Available walls</button></div>
       <h4>Legend</h4>
@@ -621,14 +642,47 @@ const CONFIG = {
     { name:'Yangon International Airport', cat:'air', lat:16.9073, lon:96.1332 },
     { name:'University of Yangon', cat:'uni', lat:16.8277, lon:96.1352 },
     { name:'Thuwunna Stadium', cat:'stadium', lat:16.8135, lon:96.1915 },
-    { name:'Aung San Stadium', cat:'stadium', lat:16.7838, lon:96.1677 }
+    { name:'Aung San Stadium', cat:'stadium', lat:16.7838, lon:96.1677 },
+    { name:'Yangon General Hospital', cat:'hospital', lat:16.7795, lon:96.1490 },
+    { name:'Pun Hlaing Hospital', cat:'hospital', lat:16.8640, lon:96.0590 },
+    { name:'Hledan Centre', cat:'mall', lat:16.8240, lon:96.1287 },
+    { name:'Dagon Centre', cat:'mall', lat:16.8000, lon:96.1370 },
+    { name:'Ocean Supercenter (North Okkalapa)', cat:'mall', lat:16.9070, lon:96.1700 },
+    { name:'Pansodan (Dala) Jetty', cat:'ferry', lat:16.7700, lon:96.1625 },
+    { name:'Botahtaung Jetty', cat:'ferry', lat:16.7672, lon:96.1735 },
+    { name:'Aung Mingalar Highway Bus Station', cat:'busterm', lat:16.9147, lon:96.1556 },
+    { name:'Insein Market', cat:'market', lat:16.8930, lon:96.1030 },
+    { name:'Thein Gyi Zay', cat:'market', lat:16.7743, lon:96.1543 },
+    { name:'Thiri Mingalar Market', cat:'market', lat:16.8360, lon:96.1220 },
+    { name:'Insein Railway Station', cat:'rail', lat:16.8960, lon:96.1000 },
+    { name:'Yangon Technological University', cat:'uni', lat:16.8800, lon:96.0880 }
   ],
   // Bus corridors — schematic, along main roads. Replace with real YBS route geometry.
   busLines: [
     { name:'Pyay Road corridor', color:'#2563EB', pts:[[16.7746,96.1588],[16.7790,96.1560],[16.7950,96.1470],[16.8080,96.1390],[16.8226,96.1302],[16.8420,96.1270],[16.8650,96.1240],[16.8900,96.1290],[16.9073,96.1332]] },
     { name:'Kaba Aye Pagoda Road', color:'#16A34A', pts:[[16.7910,96.1560],[16.8063,96.1565],[16.8296,96.1546],[16.8548,96.1567],[16.8760,96.1490],[16.9073,96.1332]] },
     { name:'Insein Road corridor', color:'#9333EA', pts:[[16.8226,96.1302],[16.8450,96.1210],[16.8700,96.1120],[16.8930,96.1010],[16.9200,96.0930],[16.9550,96.0880]] },
-    { name:'East Yangon corridor', color:'#DC2626', pts:[[16.7746,96.1588],[16.7790,96.1720],[16.7850,96.1900],[16.8000,96.2050],[16.8250,96.1980],[16.8500,96.1880],[16.8800,96.1780],[16.9150,96.1720]] }
+    { name:'East Yangon corridor', color:'#DC2626', pts:[[16.7746,96.1588],[16.7790,96.1720],[16.7850,96.1900],[16.8000,96.2050],[16.8250,96.1980],[16.8500,96.1880],[16.8800,96.1780],[16.9150,96.1720]] },
+    { name:'Strand Road', color:'#06B6D4', pts:[[16.7745,96.1330],[16.7712,96.1450],[16.7700,96.1560],[16.7700,96.1650],[16.7690,96.1740],[16.7720,96.1820]] },
+    { name:'Anawrahta / Bogyoke Road', color:'#F472B6', pts:[[16.7800,96.1380],[16.7800,96.1480],[16.7803,96.1556],[16.7790,96.1650],[16.7785,96.1760],[16.7810,96.1850]] },
+    { name:'Dhammazedi Road', color:'#A3E635', pts:[[16.7985,96.1525],[16.8040,96.1470],[16.8110,96.1400],[16.8180,96.1340],[16.8226,96.1302]] },
+    { name:'Waizayantar Road', color:'#FB923C', pts:[[16.8090,96.1690],[16.8160,96.1850],[16.8240,96.2000],[16.8380,96.2200],[16.8520,96.2400],[16.8680,96.2620]] },
+    { name:'Yangon–Mandalay Road', color:'#60A5FA', pts:[[16.9073,96.1332],[16.9300,96.1380],[16.9600,96.1450],[16.9950,96.1530],[17.0300,96.1580]] },
+    { name:'Hlaing Tharyar link', color:'#34D399', pts:[[16.8420,96.1270],[16.8500,96.1120],[16.8580,96.0930],[16.8680,96.0720],[16.8780,96.0500],[16.8880,96.0300]] },
+    { name:'Thanlyin Road', color:'#C084FC', pts:[[16.7850,96.1900],[16.7820,96.2050],[16.7790,96.2200],[16.7760,96.2380]] }
+  ],
+  // Circular Railway (approximate loop)
+  railway: [[16.7811,96.1617],[16.7860,96.1750],[16.8030,96.1780],[16.8250,96.1790],[16.8500,96.1820],[16.8800,96.1750],[16.9050,96.1500],[16.9150,96.1250],[16.9000,96.1050],[16.8700,96.1090],[16.8400,96.1180],[16.8150,96.1240],[16.7950,96.1300],[16.7820,96.1450],[16.7811,96.1617]],
+  // Lakes (centre, size in metres, rotation) and river labels — approximate
+  lakes: [ { name:'Inya Lake', lat:16.8355, lon:96.1455, w:1100, h:2600, rot:-12 }, { name:'Kandawgyi Lake', lat:16.7920, lon:96.1640, w:1500, h:700, rot:0 } ],
+  rivers: [ { name:'Yangon River', lat:16.7620, lon:96.1700 }, { name:'Hlaing River', lat:16.8450, lon:96.0980 }, { name:'Pazundaung Creek', lat:16.7930, lon:96.1880 }, { name:'Bago River', lat:16.7650, lon:96.2350 } ],
+  // Busy junctions — approximate positions
+  junctions: [
+    { name:'Hledan Junction', lat:16.8226, lon:96.1302 }, { name:'Myaynigone Junction', lat:16.8048, lon:96.1338 },
+    { name:'Sule Roundabout', lat:16.7746, lon:96.1588 }, { name:'Shwegondaing Junction', lat:16.8105, lon:96.1530 },
+    { name:'Thamaing Junction', lat:16.8440, lon:96.1250 }, { name:'8 Mile Junction', lat:16.8650, lon:96.1315 },
+    { name:'9 Mile Junction', lat:16.8750, lon:96.1300 }, { name:'Kyaikkasan / Tamwe Junction', lat:16.8000, lon:96.1720 },
+    { name:'Hanthawaddy Roundabout', lat:16.8150, lon:96.1310 }, { name:'Kyauk Myaung Junction', lat:16.8180, lon:96.1700 }
   ],
   periods: [ {label:'2 weeks',months:.5}, {label:'1 month',months:1}, {label:'3 months',months:3}, {label:'6 months',months:6}, {label:'12 months',months:12} ],
   tailoring: { finish:['Hand-painted mural','Vinyl','Flex banner','Poster paste'], addons:['QR code','Night lighting','Selfie wall','Sampling day','Monthly photo report'] },
@@ -663,7 +717,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 const sess={get(){try{return sessionStorage.getItem('aw-session')}catch(e){return null}},set(v){try{v?sessionStorage.setItem('aw-session',v):sessionStorage.removeItem('aw-session')}catch(e){}}};
 let view='home', selected=null, zoneFilter=null, colorMode='zone', availOnly=false, sortBy='id', form={}, me=null;
 let shortlist=store.get('aw-list',[]).filter(s=>s.id.startsWith('REQ-')||wallById(s.id));
-let showLm=true, showBus=true;
+let showLm=true, showBus=true, showRail=true, showJn=true, showWater=true;
 
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2000)}
 
@@ -701,7 +755,8 @@ map.setAttribute('viewBox',`0 0 ${GEO.w} ${GEO.h}`);
 const el=(tag,attrs={})=>{const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e};
 const G=n=>{const g=el('g');g.id='g-'+n;return g};
 const gTs=G('ts'),gLbl=G('lbl'),gBus=G('bus'),gFx=G('fx'),gRoute=G('route'),gPins=G('pins'),gBadges=G('badges'),gLm=G('lm');
-map.append(gTs,gBus,gLbl,gFx,gRoute,gLm,gPins,gBadges);
+const gWater=G('water'),gRail=G('rail'),gJn=G('jn');
+map.append(gTs,gWater,gRail,gBus,gLbl,gJn,gFx,gRoute,gLm,gPins,gBadges);
 /* halftone dot patterns: dots keep the same on-screen size at every zoom */
 const PATS={pzA:'#F5B800',pzB:'#EE8A5C',pzC:'#8A93A8',ph0:'#4A5060',ph1:'#8C7230',ph2:'#D9A400',ph3:'#FFD447'};
 const patDefs=el('defs'); const patEls=[];
@@ -727,8 +782,32 @@ function bootApp(){
     g.addEventListener('pointerenter',e=>showTip(e,w.spot,`${w.id} · ${w.status}${w.pano?' · 360° view':''}`)); g.addEventListener('pointerleave',hideTip)});
   GEO.townships.forEach(t=>{const n=wallsIn(t.name).length; if(!n) return; const g=el('g',{class:'badge-g'}); g.dataset.n=t.name;
     const c=el('circle',{cx:t.cx,cy:t.cy+16,r:9}); const tx=el('text',{x:t.cx,y:t.cy+16}); tx.textContent=n; g.append(c,tx); gBadges.append(g); t.badge={c,tx}});
-  CONFIG.busLines.forEach(b=>{const d='M'+b.pts.map(p=>P(p[0],p[1]).map(v=>v.toFixed(1)).join(',')).join('L');
-    gBus.append(el('path',{d,class:'bus-halo'})); const pl=el('path',{d,class:'bus',stroke:b.color}); pl.dataset.bus=b.name; gBus.append(pl)});
+  const dOf=pts=>'M'+pts.map(p=>P(p[0],p[1]).map(v=>v.toFixed(1)).join(',')).join('L');
+  CONFIG.busLines.forEach((b,i)=>{const d=dOf(b.pts);
+    gBus.append(el('path',{d,class:'bus-halo'})); const pl=el('path',{d,class:'bus',stroke:b.color,id:'bus-'+i}); pl.dataset.bus=b.name; gBus.append(pl);
+    const lp=[...b.pts]; if(P(lp[0][0],lp[0][1])[0]>P(lp[lp.length-1][0],lp[lp.length-1][1])[0]) lp.reverse();
+    const lpath=el('path',{d:dOf(lp),id:'busl-'+i,fill:'none',stroke:'none'}); gBus.append(lpath);
+    const tx=el('text',{class:'roadlbl',fill:b.color,dy:-4}); const tp=el('textPath',{href:'#busl-'+i,startOffset:'50%','text-anchor':'middle'}); tp.textContent=b.name; tx.append(tp); gBus.append(tx)});
+  // circular railway
+  const rd=dOf(CONFIG.railway); gRail.append(el('path',{d:rd,class:'rail-bed'})); const rl=el('path',{d:rd,class:'rail-line'}); rl.dataset.bus='Yangon Circular Railway'; gRail.append(rl);
+  gRail.addEventListener('pointermove',e=>showTip(e,'Yangon Circular Railway','Approximate loop')); gRail.addEventListener('pointerleave',hideTip);
+  // lakes and rivers
+  CONFIG.lakes.forEach(l=>{const [x,y]=P(l.lat,l.lon); const e=el('ellipse',{class:'lake',cx:x,cy:y,rx:l.w/2/M_PER_UNIT,ry:l.h/2/M_PER_UNIT,transform:`rotate(${l.rot} ${x} ${y})`}); gWater.append(e);
+    const t=el('text',{class:'waterlbl',x,y}); t.textContent=l.name; t.dataset.water=1; gWater.append(t)});
+  CONFIG.rivers.forEach(r=>{const [x,y]=P(r.lat,r.lon); const t=el('text',{class:'waterlbl',x,y}); t.textContent=r.name; t.dataset.water=1; gWater.append(t)});
+  // busy junctions
+  CONFIG.junctions.forEach((j,i)=>{[j.x,j.y]=P(j.lat,j.lon); const g=el('g',{class:'jn'}); const w=el('circle',{class:'wave',cx:j.x,cy:j.y,r:3}); w.style.animationDelay=(i*0.27%2.8)+'s';
+    g.append(w,el('circle',{class:'core',cx:j.x,cy:j.y,r:2.2})); gJn.append(g); j.g=g;
+    g.addEventListener('pointerenter',e=>showTip(e,j.name,'Busy junction · approximate')); g.addEventListener('pointerleave',hideTip)});
+  // township city data
+  GEO.townships.forEach(t=>{const bb=t.el.getBBox(); let a=0; t.d.split('M').filter(Boolean).forEach(seg=>{const pts=seg.replace('Z','').split('L').map(q=>q.split(',').map(Number)); for(let i=0;i<pts.length;i++){const [x1,y1]=pts[i],[x2,y2]=pts[(i+1)%pts.length]; a+=x1*y2-x2*y1}});
+    t.area=Math.abs(a)/2*M_PER_UNIT*M_PER_UNIT/1e6;
+    const inT=(x,y)=>{try{const q=map.createSVGPoint();q.x=x;q.y=y;return t.el.isPointInFill(q)}catch(e){return false}};
+    t.buses=CONFIG.busLines.filter(b=>{const pp=b.pts.map(p=>P(p[0],p[1])); for(let i=0;i<pp.length-1;i++){for(let f=0;f<=1;f+=.1){if(inT(pp[i][0]+(pp[i+1][0]-pp[i][0])*f,pp[i][1]+(pp[i+1][1]-pp[i][1])*f)) return true}} return false});
+    t.rail=CONFIG.railway.some((p,i,arr)=>{if(i===arr.length-1) return false; const a1=P(p[0],p[1]),b1=P(arr[i+1][0],arr[i+1][1]); for(let f=0;f<=1;f+=.1){if(inT(a1[0]+(b1[0]-a1[0])*f,a1[1]+(b1[1]-a1[1])*f)) return true} return false});
+    t.jns=CONFIG.junctions.filter(j=>inT(j.x,j.y)).length;
+    t.lmn=CONFIG.landmarks.filter(l=>inT(...P(l.lat,l.lon))).length;
+    t.el.setAttribute('aria-label',`${nice(t.name)}, zone ${t.zone}, ${wallsIn(t.name).length} walls, about ${t.area.toFixed(1)} square kilometres`)});
   CONFIG.landmarks.forEach(l=>{[l.x,l.y]=P(l.lat,l.lon); const g=el('g',{class:'lm'}); g.dataset.lm=l.name;
     const s=el('g'); s.append(el('circle',{class:'disc',cx:12,cy:12,r:13})); const gl=el('path',{class:'glyph',d:GLYPH[l.cat]||GLYPH.gov,'fill-rule':'evenodd'}); gl.setAttribute('transform','translate(4.8 4.8) scale(.6)'); s.append(gl);
     g.append(s); gLm.append(g); l.g=g; l.s=s;
@@ -741,8 +820,12 @@ function bootApp(){
   booting=true; renderHome(); booting=false;
   if(wallById(h)) openWall(h); else if(byName[h]) select(h,true);
 }
-const CAT={pagoda:'Pagoda',gov:'Government building',park:'Park & lake',fun:'Amusement & zoo',cinema:'Cinema',market:'Market',rail:'Railway station',air:'Airport',uni:'University',stadium:'Stadium'};
+const CAT={hospital:'Hospital',mall:'Shopping centre',ferry:'Ferry jetty',busterm:'Bus terminal',pagoda:'Pagoda',gov:'Government building',park:'Park & lake',fun:'Amusement & zoo',cinema:'Cinema',market:'Market',rail:'Railway station',air:'Airport',uni:'University',stadium:'Stadium'};
 const GLYPH={
+  hospital:'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z',
+  mall:'M5 8h14l1.5 13h-17zM8.5 8V6.5a3.5 3.5 0 0 1 7 0V8h-1.8V6.5a1.7 1.7 0 0 0-3.4 0V8z',
+  ferry:'M3 15h18l-3 5H6zM6.5 13.5l1-5.5h9l1 5.5zM11 3.5h2V8h-2z',
+  busterm:'M5 3h14a2 2 0 0 1 2 2v12H3V5a2 2 0 0 1 2-2zm1 3v5h12V6zM5 18h4v3H5zm10 0h4v3h-4z',
   pagoda:'M12 1l1.2 4h-2.4zM10 6h4l1.2 3.5H8.8zM7.5 10.5h9l1.8 5.5H5.7zM4 17h16v3H4z',
   gov:'M12 2l10 5H2zM4 8.5h3v8H4zM10.5 8.5h3v8h-3zM17 8.5h3v8h-3zM2 18h20v3H2z',
   park:'M12 2a6 6 0 0 1 6 6 4.5 4.5 0 0 1-3 7.6h-2V22h-2v-6.4H9A4.5 4.5 0 0 1 6 8a6 6 0 0 1 6-6z',
@@ -772,6 +855,10 @@ function setVB(v){
   const ls=Math.min(1.4,Math.max(.55,1.6/Math.sqrt(k)))/k*1.1; // landmark icon scale
   CONFIG.landmarks.forEach(l=>{if(l.s){l.s.setAttribute('transform',`translate(${l.x} ${l.y}) scale(${ls}) translate(-12 -12)`); l.g.style.display=showLm&&(k>1.25||['pagoda','air','stadium'].includes(l.cat))?'':'none'}});
   gBus.style.display=showBus?'':'none';
+  gRail.style.display=showRail?'':'none'; gJn.style.display=showJn?'':'none'; gWater.style.display=showWater?'':'none';
+  gBus.querySelectorAll('.roadlbl').forEach(t=>{t.style.fontSize=(9/k)+'px'; t.style.strokeWidth=(3/k)+'px'; t.style.display=k>1.7?'':'none'});
+  gWater.querySelectorAll('.waterlbl').forEach(t=>{t.style.fontSize=(10/k)+'px'; t.style.strokeWidth=(3/k)+'px'});
+  CONFIG.junctions.forEach(j=>{if(!j.g) return; j.g.querySelector('.core').setAttribute('r',3/k); j.g.querySelector('.wave').setAttribute('r',3/k); j.g.style.display=k>1.3?'':'none'});
   fxScale(k);
 }
 let animId=0;
@@ -809,7 +896,7 @@ map.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId); if(ptrs.size<2) p
 map.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);pinch=null;drag=null;map.classList.remove('drag')});
 map.addEventListener('wheel',e=>{e.preventDefault(); animId++; const p=map.createSVGPoint(); p.x=e.clientX;p.y=e.clientY; const pt=p.matrixTransform(map.getScreenCTM().inverse());
   const f=e.deltaY>0?1.15:.87, w=vb.w*f, h=w/(GEO.w/GEO.h); setVB({x:pt.x-(pt.x-vb.x)*(w/vb.w),y:pt.y-(pt.y-vb.y)*(h/vb.h),w})},{passive:false});
-gTs.addEventListener('pointermove',e=>{const n=e.target.dataset.n; if(n&&!drag){showTip(e,nice(n),`Zone ${zoneOf(n)} · ${wallsIn(n).length} walls · ${availIn(n)} available`)}});
+gTs.addEventListener('pointermove',e=>{const n=e.target.dataset.n; if(n&&!drag){showTip(e,nice(n),`Zone ${zoneOf(n)} · ${wallsIn(n).length} walls · ${availIn(n)} available · ~${byName[n].area?byName[n].area.toFixed(1):'?'} km²`)}});
 gTs.addEventListener('pointerleave',hideTip);
 gBus.addEventListener('pointermove',e=>{const b=e.target.dataset.bus; if(b) showTip(e,b,'Bus corridor (approximate)')});
 gBus.addEventListener('pointerleave',hideTip);
@@ -822,7 +909,7 @@ function heatClass(n){const a=availIn(n); return a===0?'h0':a===1?'h1':a===2?'h2
 function paint(){
   document.querySelectorAll('.chip[data-z]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.z===zoneFilter));
   document.querySelectorAll('#cmode .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===colorMode));
-  $('#tLm').setAttribute('aria-pressed',showLm); $('#tBus').setAttribute('aria-pressed',showBus);
+  $('#tLm').setAttribute('aria-pressed',showLm); $('#tBus').setAttribute('aria-pressed',showBus); $('#tRail').setAttribute('aria-pressed',showRail); $('#tJn').setAttribute('aria-pressed',showJn); $('#tWater').setAttribute('aria-pressed',showWater);
   $('#lyrLm').setAttribute('aria-pressed',showLm); $('#lyrBus').setAttribute('aria-pressed',showBus);
   map.classList.toggle('heat',colorMode==='heat'); map.classList.toggle('focus',!!selected);
   GEO.townships.forEach(t=>{t.el.classList.remove('h0','h1','h2','h3'); t.el.classList.add(heatClass(t.name));
@@ -831,8 +918,8 @@ function paint(){
   const base = colorMode==='zone'
     ? `<div class="row"><span><i style="background:var(--zA)"></i>A · City centre</span><span><i style="background:var(--zB)"></i>B · Inner residential</span><span><i style="background:var(--zC)"></i>C · Outer</span></div>`
     : `<div class="row"><span><i style="background:var(--h0)"></i>None yet</span><span><i style="background:var(--h1)"></i>1</span><span><i style="background:var(--h2)"></i>2</span><span><i style="background:var(--h3)"></i>3+ available</span></div>`;
-  const bus = showBus?`<div class="row">${CONFIG.busLines.map(b=>`<span><i class="ln" style="background:${b.color}"></i>${esc(b.name)}</span>`).join('')}</div>`:'';
-  $('#legend').innerHTML = base+bus+`<div class="hint">Numbers show walls listed. Bus lines are approximate.</div>`;
+  const bus = (showBus?`<div class="row">${CONFIG.busLines.map(b=>`<span><i class="ln" style="background:${b.color}"></i>${esc(b.name)}</span>`).join('')}</div>`:'')+`<div class="row">${showRail?'<span><i class="ln" style="background:repeating-linear-gradient(90deg,#D8D2C4 0 5px,transparent 5px 8px)"></i>Circular railway</span>':''}${showJn?'<span><i style="background:#EEEAE0;border-radius:50%;width:9px;height:9px"></i>Busy junction</span>':''}${showWater?'<span><i style="background:#16314A;border:1px solid #2B5578"></i>Lake / river</span>':''}</div>`;
+  $('#legend').innerHTML = base+bus+`<div class="hint">Numbers show walls listed. Bus lines, railway, junctions and landmarks are approximate.</div>`;
   drawRoute(); setVB({...vb});
 }
 function drawRoute(){
@@ -842,6 +929,7 @@ function drawRoute(){
 }
 document.querySelectorAll('.chip[data-z]').forEach(c=>c.onclick=()=>{zoneFilter=zoneFilter===c.dataset.z?null:c.dataset.z; paint(); if(view==='home') renderHome()});
 document.querySelectorAll('#cmode .chip').forEach(b=>b.onclick=()=>{colorMode=b.dataset.mode; paint()});
+$('#tRail').onclick=()=>{showRail=!showRail;paint()}; $('#tJn').onclick=()=>{showJn=!showJn;paint()}; $('#tWater').onclick=()=>{showWater=!showWater;paint()};
 $('#lyrLm').onclick=$('#tLm').onclick=()=>{showLm=!showLm;paint()}; $('#lyrBus').onclick=$('#tBus').onclick=()=>{showBus=!showBus;paint()};
 
 
@@ -858,7 +946,7 @@ $('#rLayers').onclick=()=>{const l=$('#layers'); l.hidden=!l.hidden; $('#rLayers
 document.addEventListener('pointerdown',e=>{const l=$('#layers'); if(!l.hidden&&!e.target.closest('#layers,#rLayers')){l.hidden=true;$('#rLayers').setAttribute('aria-pressed','false')}});
 map.addEventListener('pointerdown',hideHint,{once:true});
 function countUp(elm,to,dur=1400,delay=0){const t0=performance.now()+delay; const step=now=>{const p=reduced?1:Math.min(1,Math.max(0,(now-t0)/dur)); elm.textContent=Math.round(to*(1-Math.pow(1-p,4))); if(p<1) requestAnimationFrame(step)}; requestAnimationFrame(step)}
-function statsData(){return [[GEO.townships.length,'Townships'],[CONFIG.walls.length,'Walls listed'],[CONFIG.walls.filter(w=>w.status==='Available').length,'Available now'],[CONFIG.landmarks.length,'Landmarks'],[CONFIG.busLines.length,'Bus corridors']]}
+function statsData(){return [[GEO.townships.length,'Townships'],[CONFIG.walls.length,'Walls listed'],[CONFIG.walls.filter(w=>w.status==='Available').length,'Available now'],[CONFIG.landmarks.length,'Landmarks'],[CONFIG.busLines.length,'Bus corridors'],[CONFIG.junctions.length,'Busy junctions']]}
 function renderStats(){const sb=$('#statbar'); sb.innerHTML=statsData().map(([n,l],i)=>`<div><b><em data-n="${n}">0</em></b><span>${l}</span></div>`).join(''); sb.querySelectorAll('em').forEach((e,i)=>{e.style.color=i===2?'var(--sun)':'inherit'; countUp(e,+e.dataset.n,1400,900+i*120)})}
 
 /* ---------- township reveal effect: spotlight + glowing edge + wall beacons ---------- */
@@ -975,6 +1063,10 @@ function renderTownship(n){
     <div class="crumbs"><button class="back" id="back">← All townships</button><div class="stepper"><button id="prevT" aria-label="Previous township">‹</button><button id="nextT" aria-label="Next township">›</button></div></div>
     <div style="display:grid;gap:10px"><span class="zpill" style="background:var(--z${t.zone})">Zone ${t.zone} · ${Z.tier}</span><h2>${esc(nice(n))}</h2><p class="muted">${Z.name} · ${total} walls listed · ${availIn(n)} available</p></div>
     <div class="facts"><div><span>Traffic</span><b>${esc(Z.traffic)}</b></div><div><span>POV</span><b>${esc(Z.pov)}</b></div><div><span>Zone price</span><b>${price(t.zone)}</b></div><div><span>Benefit</span><b>${esc(Z.benefit)}</b></div></div>
+    <div style="display:grid;gap:8px"><p class="eyebrow">City data</p>
+      <div class="cityfacts"><div><b>${t.area.toFixed(1)}</b><span>km² (approx.)</span></div><div><b>${t.buses.length}</b><span>Bus corridors</span></div><div><b>${t.jns}</b><span>Busy junctions</span></div>
+      <div><b>${t.lmn}</b><span>Landmarks</span></div><div><b>${t.rail?'Yes':'No'}</b><span>Circular railway</span></div><div><b>${total?(total/t.area).toFixed(1):'0'}</b><span>Walls per km²</span></div></div>
+      ${t.buses.length?`<div class="buschips">${t.buses.map(b=>`<span><i style="background:${b.color}"></i>${esc(b.name)}</span>`).join('')}</div>`:''}</div>
     ${lms.length?`<div style="display:grid;gap:6px"><p class="eyebrow">Landmarks here</p><div class="tags">${lms.map(l=>`<span>${esc(l.name)}</span>`).join('')}</div></div>`:''}
     ${total?`<div class="toolbar"><label><input type="checkbox" id="availOnly" ${availOnly?'checked':''}> Available only</label><label>Sort <select id="sortBy"><option value="id">Wall ID</option><option value="size" ${sortBy==='size'?'selected':''}>Largest first</option></select></label></div>
       <span class="sample">Sample listings</span>
