@@ -523,6 +523,7 @@ body{font-size:14px}
 #g-sat image{transition:opacity .4s ease}
 #g-sat{filter:brightness(.78) saturate(.9) contrast(1.05)}
 .sat{background:#06070A}
+#map{overflow:visible}
 .sat .ts{stroke:rgba(255,255,255,.55);stroke-width:.9}
 .sat .ts.zA{fill:rgba(245,184,0,.16)} .sat .ts.zB{fill:rgba(238,138,92,.15)} .sat .ts.zC{fill:rgba(138,147,168,.06)}
 .sat .heat .ts.h0,.sat .ts.h0{}
@@ -1094,13 +1095,18 @@ function satRange(z,latT,lonL,latB,lonR){return [Math.floor(lon2t(lonL,z)),Math.
 function satUpdate(){
   gSat.style.display=showSat?'':'none'; $('#stage').classList.toggle('sat',showSat); $('#satAttr').hidden=!showSat; if(!showSat) return;
   const [aT,oL]=unP(0,0),[aB,oR]=unP(GEO.w,GEO.h);
-  if(!satBaseDone){const [x0,x1,y0,y1]=satRange(12,aT,oL,aB,oR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(12,x,y,gSatBase); satBaseDone=true}
+  if(!satBaseDone){
+    // wide surround at z11 so any screen shape is filled, then z12 over the city
+    const [eT,eL]=unP(-GEO.w*1.1,-GEO.h*1.1),[eB,eR]=unP(GEO.w*2.1,GEO.h*2.1);
+    {const [x0,x1,y0,y1]=satRange(11,eT,eL,eB,eR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(11,x,y,gSatBase)}
+    {const [mT,mL]=unP(-GEO.w*.15,-GEO.h*.15),[mB,mR]=unP(GEO.w*1.15,GEO.h*1.15); const [x0,x1,y0,y1]=satRange(12,mT,mL,mB,mR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(12,x,y,gSatBase)}
+    satBaseDone=true}
   const sc=Math.min(map.clientWidth/vb.w,map.clientHeight/vb.h)||1, mpp=M_PER_UNIT/sc;
-  let z=Math.round(Math.log2(149900/mpp)); z=Math.max(13,Math.min(CONFIG.satellite.maxZoom,z));
+  const dpr=Math.min(2,devicePixelRatio||1); let z=Math.round(Math.log2(149900/mpp)+Math.log2(dpr)); z=Math.max(13,Math.min(CONFIG.satellite.maxZoom,z));
   const cw=map.clientWidth/sc, ch=map.clientHeight/sc, X0=vb.x+vb.w/2-cw/2, Y0=vb.y+vb.h/2-ch/2;
-  const [lT,lL]=unP(Math.max(0,X0),Math.max(0,Y0)), [lB,lR]=unP(Math.min(GEO.w,X0+cw),Math.min(GEO.h,Y0+ch));
+  const [lT,lL]=unP(X0,Y0), [lB,lR]=unP(X0+cw,Y0+ch);
   let [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR);
-  while((x1-x0+1)*(y1-y0+1)>140&&z>13){z--; [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR)}
+  while((x1-x0+1)*(y1-y0+1)>120&&z>13){z--; [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR)}
   const need=new Set(); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){need.add(z+'/'+x+'/'+y); satTile(z,x,y,gSatHi)}
   for(const [k,im] of satCache){ if(im.parentNode===gSatHi && !need.has(k)){ if(!k.startsWith(z+'/')){im.remove(); satCache.delete(k)} } }
   if(satCache.size>420){for(const [k,im] of satCache){if(im.parentNode===gSatHi&&!need.has(k)){im.remove();satCache.delete(k)} if(satCache.size<300)break}}
