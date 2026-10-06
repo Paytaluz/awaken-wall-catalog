@@ -4,12 +4,9 @@ A private, map-based catalog of advertising walls inside Yangon's neighbourhoods
 
 Everything is in one file: `index.html`. Open it in a browser to run it.
 
-## Demo logins (change before going live)
+## Logins
 
-| Role  | Username     | Password        |
-|-------|--------------|-----------------|
-| Admin | `admin`      | `Awaken#Admin26` |
-| Brand | `demo-brand` | `Brand#Demo26`  |
+Demo accounts are defined in `CONFIG.accounts` in `index.html` (hashed). Ask the admin for login details; they are not listed here because this repository is public.
 
 ## Editing content
 
