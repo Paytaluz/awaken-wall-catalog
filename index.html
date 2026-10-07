@@ -980,7 +980,7 @@ const GLYPH={
 };
 
 function clampVB(v){
-  const r=GEO.w/GEO.h; v.w=Math.max(45,Math.min(full.w,v.w)); v.h=v.w/r;
+  const r=GEO.w/GEO.h; v.w=Math.max(22,Math.min(full.w,v.w)); v.h=v.w/r;
   v.x=Math.max(0,Math.min(full.w-v.w,v.x)); v.y=Math.max(0,Math.min(full.h-v.h,v.y)); return v;
 }
 function setVB(v){
