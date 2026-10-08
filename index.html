@@ -580,6 +580,7 @@ body{font-size:14px}
 .pubsum div{padding:12px;display:grid;gap:2px}.pubsum div+div{border-left:1px solid var(--glass-line)}
 .pubsum b{font-family:var(--display);font-size:24px;font-weight:600}.pubsum span{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);font-weight:700}
 .how{font-size:12.5px;color:var(--ink-2)} .how summary{cursor:pointer;color:var(--ink);font-weight:600} .how ol{padding-left:18px;margin:8px 0 0;display:grid;gap:4px}
+.ghstat{margin:0;font-size:12.5px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--ink-2)} .ghstat.ok{color:#7BE0A0;background:rgba(80,200,120,.12)} .ghstat.bad{color:#FF9D8A;background:rgba(255,110,80,.12)}
 .log{margin:0;padding-left:18px;font-size:12.5px;display:grid;gap:3px;color:var(--ink-2)}
 code{font-size:12px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px}
 .picking #map{cursor:crosshair}
@@ -1593,7 +1594,25 @@ const b64utf8=str=>{const by=new TextEncoder().encode(str); let s=''; for(let i=
 const utf8b64=b=>new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\n/g,'')),c=>c.charCodeAt(0)));
 const blob64=b=>new Promise((ok,bad)=>{const r=new FileReader(); r.onload=()=>ok(String(r.result).split(',')[1]); r.onerror=()=>bad(r.error); r.readAsDataURL(b)});
 async function ghApi(path,opt={}){const g=gh(); const r=await fetch(`https://api.github.com/repos/${g.repo}/contents/${path}${opt.method?'':`?ref=${encodeURIComponent(g.branch)}`}`,{...opt,headers:{'Accept':'application/vnd.github+json','Authorization':'Bearer '+g.token,...(opt.body?{'Content-Type':'application/json'}:{})}});
-  if(r.status===404&&!opt.method) return null; if(!r.ok){let m=''; try{m=(await r.json()).message}catch(e){} throw new Error(`GitHub ${r.status}: ${m||r.statusText}`)} return r.json()}
+  if(r.status===404&&!opt.method) return null; if(!r.ok){let m=''; try{m=(await r.json()).message}catch(e){} throw new Error(ghWhy(r.status,m))} return r.json()}
+function ghWhy(st,m){const g=gh();
+ if(st===401) return 'GitHub says the token is not valid (401). Paste the token value itself (it starts with github_pat_), not its name, and check it has not expired.';
+ if(st===403) return 'The token cannot write to '+g.repo+' (403). On GitHub, edit the token: Repository access → Only select repositories → awaken-wall-catalog; Permissions → Contents → Read and write. Then Save.';
+ if(st===404) return 'Repository '+g.repo+' or branch '+g.branch+' not found for this token (404). Check the Repository box reads Paytaluz/awaken-wall-catalog and the token has access to it.';
+ if(st===409||st===422) return 'GitHub rejected the change ('+st+'): '+(m||'conflict')+'. Reload the page and publish again.';
+ return 'GitHub '+st+': '+(m||'request failed')}
+function tokShape(t){if(!t) return 'Paste the token first.'; if(/\s/.test(t)||!/^(github_pat_|ghp_)/.test(t)) return 'That is not a token value. The name you gave it (e.g. "AWK Wall") is only a label. Paste the long code GitHub showed once, starting with github_pat_. If you did not copy it, regenerate the token.'; return ''}
+async function ghTest(){const g=gh(); const bad=tokShape(g.token); if(bad) return {ok:false,msg:bad};
+ const H={'Accept':'application/vnd.github+json','Authorization':'Bearer '+g.token};
+ let r; try{r=await fetch('https://api.github.com/user',{headers:H})}catch(e){return {ok:false,msg:'Could not reach GitHub from here. Open the live site (paytaluz.github.io/awaken-wall-catalog) and try there.'}}
+ if(r.status===401) return {ok:false,msg:ghWhy(401)}; const who=r.ok?(await r.json()).login:'?';
+ const cur=await fetch(`https://api.github.com/repos/${g.repo}/contents/${CONFIG.dataFile}?ref=${encodeURIComponent(g.branch)}`,{headers:H});
+ if(!cur.ok) return {ok:false,msg:ghWhy(cur.status)};
+ /* write-permission probe: a PUT with a deliberately wrong sha changes nothing; 409/422 = allowed, 403/404 = no write access */
+ const p=await fetch(`https://api.github.com/repos/${g.repo}/contents/${CONFIG.dataFile}`,{method:'PUT',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({message:'permission check',content:'',sha:'0000000000000000000000000000000000000000',branch:g.branch})});
+ if(p.status===403||p.status===404) return {ok:false,msg:ghWhy(403)};
+ if(p.status===401) return {ok:false,msg:ghWhy(401)};
+ return {ok:true,msg:'Connected as '+who+'. The token can publish to '+g.repo+'.'}}
 function finalWalls(base,d){const out=base.filter(w=>!d.deleted.includes(w.id)&&!d.walls[w.id]);
   Object.values(d.walls).forEach(w=>{const c=JSON.parse(JSON.stringify(w)); c.photos=(c.photos||[]).map(r=>String(r).replace(/^idb:/,'')); if(c.pano) c.pano=String(c.pano).replace(/^idb:/,''); out.push(c)});
   return out.map(w=>{const c={...w}; delete c._draft; delete c.pin; delete c.x; delete c.y; return c})}
@@ -1607,20 +1626,21 @@ function renderAdmPublish(head,d){
       <p class="note">Publishing writes <code>walls.json</code> and the photos to your GitHub repository. The live site updates for everyone about a minute later. The token is kept only in this browser.</p>
       <div class="two"><label class="field">Repository<input id="gRepo" value="${esc(g.repo)}"></label><label class="field">Branch<input id="gBr" value="${esc(g.branch)}"></label></div>
       <label class="field">Access token<input id="gTok" type="password" value="${esc(g.token)}" placeholder="github_pat_…" autocomplete="off"></label>
-      <details class="how"><summary>How to get a token</summary><ol><li>Open github.com → Settings → Developer settings → Fine-grained tokens → Generate new token.</li><li>Repository access: <b>Only select repositories</b> → <code>awaken-wall-catalog</code>.</li><li>Permissions → Repository → <b>Contents: Read and write</b>.</li><li>Generate, copy and paste it here. Never share it.</li></ol></details>
-      <div class="row2"><button class="btn btn-line btn-sm" id="gSave" type="button">Save connection</button>${g.token?'<button class="btn btn-line btn-sm" id="gForget" type="button">Forget token</button>':''}</div></div>
+      <details class="how"><summary>How to get a token</summary><ol><li>Open github.com → Settings → Developer settings → Fine-grained tokens → Generate new token.</li><li>Repository access: <b>Only select repositories</b> → <code>awaken-wall-catalog</code>.</li><li>Permissions → Repository → <b>Contents: Read and write</b>.</li><li>Generate, then copy the long code GitHub shows <b>once</b> (starts with <code>github_pat_</code>). The token's name (e.g. “AWK Wall”) is just a label; do not paste the name.</li><li>Paste it here and press <b>Save &amp; test connection</b>. Never share it.</li></ol></details>
+      <p class="ghstat" id="ghStat" hidden></p>
+      <div class="row2"><button class="btn btn-line btn-sm" id="gSave" type="button">Save &amp; test connection</button>${g.token?'<button class="btn btn-line btn-sm" id="gForget" type="button">Forget token</button>':''}</div></div>
     <button class="btn btn-sun" id="pubGo" type="button" ${nW+nD?'':'disabled'}>Publish ${nW+nD} change${nW+nD===1?'':'s'} to the live site</button>
     <ol class="log" id="pubLog"></ol>
     <button class="btn btn-line btn-sm" id="dlJson" type="button" style="justify-self:start">Download walls.json instead</button>
     <p class="note">No token? Download <code>walls.json</code> and upload it to the repository on GitHub (Add file → Upload files). Photos added here only upload when you publish with a token.</p>`;
   bindAdmTabs();
   const saveG=()=>{store.set('aw-gh',{repo:$('#gRepo').value.trim(),branch:$('#gBr').value.trim()||'main',token:$('#gTok').value.trim()})};
-  $('#gSave').onclick=()=>{saveG(); toast('Connection saved in this browser')};
+  $('#gSave').onclick=async()=>{saveG(); const st=$('#ghStat'); st.hidden=false; st.className='ghstat'; st.textContent='Checking with GitHub…'; const res=await ghTest().catch(e=>({ok:false,msg:String(e.message||e)})); st.className='ghstat '+(res.ok?'ok':'bad'); st.textContent=(res.ok?'✓ ':'✗ ')+res.msg};
   const fg=$('#gForget'); if(fg) fg.onclick=()=>{store.set('aw-gh',{...gh(),token:''}); renderAdmin('publish')};
   $('#dlJson').onclick=()=>{const txt=JSON.stringify(finalWalls(CONFIG.walls.filter(w=>!w._draft),drafts()),null,1); const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'})); a.download='walls.json'; document.body.append(a); a.click(); a.remove()};
   $('#pubGo').onclick=async()=>{
     saveG(); const g2=gh(); const log=m=>{const li=document.createElement('li'); li.textContent=m; $('#pubLog').append(li); return li};
-    if(!g2.token){toast('Add a GitHub token first'); return}
+    {const bad=tokShape(g2.token); if(bad){log('✗ '+bad); toast('Check the token'); return}}
     const btn=$('#pubGo'); btn.disabled=true; btn.textContent='Publishing…'; $('#pubLog').innerHTML='';
     try{
       const dd=drafts();
