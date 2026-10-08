@@ -374,7 +374,7 @@ body{background:var(--bg)}
 .lm .glyph{fill:#EEEAE0}
 .lm:hover .disc{fill:var(--sun)} .lm:hover .glyph{fill:#14161C}
 .bus-halo{stroke:#0B0D12;opacity:.9}
-.bus{opacity:.85;filter:drop-shadow(0 0 3px currentColor)}
+.bus{opacity:.9}
 
 /* search + chips, top-left under header */
 .controls{top:78px;left:84px;width:min(340px,calc(100% - 100px))}
@@ -523,7 +523,7 @@ body{font-size:14px}
 .loader .pct{font-size:50px}
 /* satellite */
 #g-sat image{transition:opacity .4s ease}
-#g-sat{filter:brightness(.78) saturate(.9) contrast(1.05)}
+#g-sat .satdim{fill:#000;opacity:.22;pointer-events:none}
 .sat{background:#06070A}
 #map{overflow:visible}
 .sat .ts{stroke:rgba(255,255,255,.55);stroke-width:.9}
@@ -587,6 +587,23 @@ code{font-size:12px;background:rgba(255,255,255,.08);padding:1px 5px;border-radi
 .draftmk .dot{fill:#0B0D12}
 .draftmk .pulse{fill:none;stroke:#F5B800;stroke-width:2;vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center;animation:jnw 1.8s ease-out infinite}
 @media (max-width:420px){.three{grid-template-columns:1fr 1fr}.phgrid{grid-template-columns:1fr 1fr}}
+
+@media (pointer:coarse),(max-width:820px){
+  *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .jn .wave,.halo.on,.draftmk .pulse{animation:none!important}
+  .beacon .ring{animation-iteration-count:3!important}
+  .halo{filter:none!important}
+  .ts:hover,.ts.sel{filter:none!important}
+}
+
+@media (pointer:coarse),(max-width:820px){
+  :root{--glass:rgba(17,19,26,.93)}
+  .drawer,.layers,.fx{background:rgba(17,19,26,.96)!important}
+}
+@media (max-width:820px){
+  .satattr{top:118px!important;bottom:auto!important;right:12px!important;max-width:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:8px;padding:1px 6px;opacity:.7}
+  .has-panel .fx,.has-panel .rail{display:none!important}
+}
 </style>
 
 <!-- ============ LOADER ============ -->
@@ -942,12 +959,12 @@ const drafts=()=>store.get('aw-drafts',{walls:{},deleted:[]});
 const saveDrafts=d=>store.set('aw-drafts',d);
 let liveSource='built-in sample';
 async function loadWalls(){
-  try{const r=await fetch(CONFIG.dataFile+'?v='+Date.now(),{cache:'no-store'}); if(r.ok){const j=await r.json(); if(Array.isArray(j)){CONFIG.walls=j; liveSource='walls.json'}}}catch(e){}
+  try{const ac=new AbortController(); const to=setTimeout(()=>ac.abort(),5000); const r=await fetch(CONFIG.dataFile+'?v='+Date.now(),{cache:'no-store',signal:ac.signal}); clearTimeout(to); if(r.ok){const j=await r.json(); if(Array.isArray(j)){CONFIG.walls=j; liveSource='walls.json'}}}catch(e){}
   const d=drafts();
   CONFIG.walls=CONFIG.walls.filter(w=>!d.deleted.includes(w.id));
   Object.values(d.walls).forEach(w=>{const i=CONFIG.walls.findIndex(x=>x.id===w.id); const c={...w,_draft:true}; if(i>=0) CONFIG.walls[i]=c; else CONFIG.walls.push(c)});
   const refs=new Set(); Object.values(d.walls).forEach(w=>{(w.photos||[]).forEach(r=>refs.add(r)); if(w.pano) refs.add(w.pano)});
-  for(const r of refs){ if(String(r).startsWith('idb:')){ try{const b=await IDB.get(r); if(b) blobURLs[r]=URL.createObjectURL(b)}catch(e){} } }
+  for(const r of refs){ if(String(r).startsWith('idb:')){ try{const b=await Promise.race([IDB.get(r),new Promise(ok=>setTimeout(()=>ok(null),2500))]); if(b) blobURLs[r]=URL.createObjectURL(b)}catch(e){} } }
   shortlist=shortlist.filter(s=>s.id.startsWith('REQ-')||wallById(s.id));
 }
 
@@ -957,7 +974,7 @@ map.setAttribute('viewBox',`0 0 ${GEO.w} ${GEO.h}`);
 const el=(tag,attrs={})=>{const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e};
 const G=n=>{const g=el('g');g.id='g-'+n;return g};
 const gTs=G('ts'),gLbl=G('lbl'),gBus=G('bus'),gFx=G('fx'),gRoute=G('route'),gPins=G('pins'),gBadges=G('badges'),gLm=G('lm');
-const gWater=G('water'),gRail=G('rail'),gJn=G('jn'),gSat=G('sat'),gSatBase=el('g'),gSatHi=el('g'); gSat.append(gSatBase,gSatHi);
+const gWater=G('water'),gRail=G('rail'),gJn=G('jn'),gSat=G('sat'),gSatBase=el('g'),gSatHi=el('g'); gSat.append(gSatBase,gSatHi,el('rect',{class:'satdim',x:-4000,y:-4000,width:9000,height:9000}));
 const gDraft=G('draft');
 map.append(gSat,gTs,gWater,gRail,gBus,gLbl,gJn,gRoute,gLm,gFx,gPins,gBadges,gDraft);
 let adminPick=false, draftMk=null;
@@ -1146,6 +1163,7 @@ $('#lyrLm').onclick=$('#tLm').onclick=()=>{showLm=!showLm;paint()}; $('#lyrBus')
 
 /* ---------- satellite tiles (Web Mercator tiles placed onto the map projection) ---------- */
 let satT=0; const satCache=new Map(); let satBaseDone=false;
+const LITE=matchMedia('(pointer:coarse)').matches||innerWidth<820;
 const t2lon=(x,z)=>x/2**z*360-180, t2lat=(y,z)=>{const n=Math.PI-2*Math.PI*y/2**z;return 180/Math.PI*Math.atan(Math.sinh(n))};
 const lon2t=(lon,z)=>(lon+180)/360*2**z, lat2t=(lat,z)=>{const r=lat*Math.PI/180;return (1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*2**z};
 const unP=(x,y)=>{const p=GEO.proj;return [p.maxy-(y-p.pad)/p.sx, p.minx+(x-p.pad)/(p.k*p.sx)]};
@@ -1160,19 +1178,20 @@ function satUpdate(){
   const [aT,oL]=unP(0,0),[aB,oR]=unP(GEO.w,GEO.h);
   if(!satBaseDone){
     // wide surround at z11 so any screen shape is filled, then z12 over the city
-    const [eT,eL]=unP(-GEO.w*1.1,-GEO.h*1.1),[eB,eR]=unP(GEO.w*2.1,GEO.h*2.1);
+    const E=LITE?.45:1.1; const [eT,eL]=unP(-GEO.w*E,-GEO.h*E),[eB,eR]=unP(GEO.w*(1+E),GEO.h*(1+E));
     {const [x0,x1,y0,y1]=satRange(11,eT,eL,eB,eR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(11,x,y,gSatBase)}
     {const [mT,mL]=unP(-GEO.w*.15,-GEO.h*.15),[mB,mR]=unP(GEO.w*1.15,GEO.h*1.15); const [x0,x1,y0,y1]=satRange(12,mT,mL,mB,mR); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++)satTile(12,x,y,gSatBase)}
     satBaseDone=true}
   const sc=Math.min(map.clientWidth/vb.w,map.clientHeight/vb.h)||1, mpp=M_PER_UNIT/sc;
-  const dpr=Math.min(2,devicePixelRatio||1); let z=Math.round(Math.log2(149900/mpp)+Math.log2(dpr)); z=Math.max(13,Math.min(CONFIG.satellite.maxZoom,z));
+  const dpr=LITE?1:Math.min(2,devicePixelRatio||1); let z=Math.round(Math.log2(149900/mpp)+Math.log2(dpr)); z=Math.max(13,Math.min(CONFIG.satellite.maxZoom,z));
   const cw=map.clientWidth/sc, ch=map.clientHeight/sc, X0=vb.x+vb.w/2-cw/2, Y0=vb.y+vb.h/2-ch/2;
   const [lT,lL]=unP(X0,Y0), [lB,lR]=unP(X0+cw,Y0+ch);
   let [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR);
-  while((x1-x0+1)*(y1-y0+1)>120&&z>13){z--; [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR)}
+  while((x1-x0+1)*(y1-y0+1)>(LITE?36:120)&&z>13){z--; [x0,x1,y0,y1]=satRange(z,lT,lL,lB,lR)}
+  if((x1-x0+1)*(y1-y0+1)>(LITE?40:180)){for(const [k,im] of satCache){if(im.parentNode===gSatHi){im.remove();satCache.delete(k)}} return}
   const need=new Set(); for(let x=x0;x<=x1;x++)for(let y=y0;y<=y1;y++){need.add(z+'/'+x+'/'+y); satTile(z,x,y,gSatHi)}
   for(const [k,im] of satCache){ if(im.parentNode===gSatHi && !need.has(k)){ if(!k.startsWith(z+'/')){im.remove(); satCache.delete(k)} } }
-  if(satCache.size>420){for(const [k,im] of satCache){if(im.parentNode===gSatHi&&!need.has(k)){im.remove();satCache.delete(k)} if(satCache.size<300)break}}
+  if(satCache.size>(LITE?140:420)){for(const [k,im] of satCache){if(im.parentNode===gSatHi&&!need.has(k)){im.remove();satCache.delete(k)} if(satCache.size<(LITE?100:300))break}}
 }
 addEventListener('resize',()=>{clearTimeout(satT); satT=setTimeout(satUpdate,150)});
 
@@ -1233,7 +1252,7 @@ function reveal(n){
   document.getElementById('spotHole').setAttribute('d',t.d);
   const spot=el('rect',{class:'spot',x:-3000,y:-3000,width:7000,height:7000,mask:'url(#spotMask)'});
   const sheen=el('path',{class:'sheen',d:t.d});
-  const halo=el('path',{class:'halo',d:t.d,filter:'url(#glowF)'});
+  const halo=el('path',LITE?{class:'halo',d:t.d}:{class:'halo',d:t.d,filter:'url(#glowF)'});
   const edge=el('path',{class:'edge',d:t.d,pathLength:1});
   gFx.append(spot,sheen,halo,edge);
   const beacons=[];
