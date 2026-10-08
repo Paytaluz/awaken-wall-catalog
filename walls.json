@@ -273,8 +273,10 @@
   "traffic": "non",
   "pov": "Eye Level",
   "status": "Under survey",
-  "photos": [],
-  "pano": "demo",
+  "photos": [
+   "photos/MAY-001-muztcrse-1.jpg"
+  ],
+  "pano": "photos/MAY-001-360-muztcrte.jpg",
   "detail": {
    "station": "Kaba Aye Pagoda",
    "address": "",
