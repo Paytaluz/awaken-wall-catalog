@@ -581,6 +581,7 @@ body{font-size:14px}
 .pubsum b{font-family:var(--display);font-size:24px;font-weight:600}.pubsum span{font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;color:var(--ink-2);font-weight:700}
 .how{font-size:12.5px;color:var(--ink-2)} .how summary{cursor:pointer;color:var(--ink);font-weight:600} .how ol{padding-left:18px;margin:8px 0 0;display:grid;gap:4px}
 .ghstat{margin:0;font-size:12.5px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.06);color:var(--ink-2)} .ghstat.ok{color:#7BE0A0;background:rgba(80,200,120,.12)} .ghstat.bad{color:#FF9D8A;background:rgba(255,110,80,.12)}
+.updmsg{margin:4px 0 0;font-size:12px;color:var(--ink-2)} .updmsg.bad{color:#FF9D8A}
 .log{margin:0;padding-left:18px;font-size:12.5px;display:grid;gap:3px;color:var(--ink-2)}
 code{font-size:12px;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px}
 .picking #map{cursor:crosshair}
@@ -1519,10 +1520,10 @@ function renderWallForm(w){
       <div class="two"><label class="field">Owner<select id="fOwner">${opt(['Scouted','In talks','Agreement signed'],dt.owner||'Scouted')}</select></label><label class="field">Available from<input id="fFrom" type="date" value="${dt.availableFrom&&/^\d{4}-/.test(dt.availableFrom)?dt.availableFrom:''}"></label></div>
       <label class="field">Notes<textarea id="fNotes" rows="2">${esc(dt.notes||'')}</textarea></label></div>
     <div class="fsec"><b>4 · Photos</b>
-      <label class="upl">Add photos (day, night, street)<input id="fPh" type="file" accept="image/*" multiple></label>
-      <div class="phgrid" id="phgrid"></div>
-      <label class="upl">${formPano?'Replace':'Add'} 360° photo (2:1 panorama)<input id="fPano" type="file" accept="image/*"></label>
-      <div id="panoPrev"></div>
+      <label class="upl">Add photos (day, night, street)<input id="fPh" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif,.insp" multiple></label>
+      <p class="updmsg" id="phMsg" hidden></p><div class="phgrid" id="phgrid"></div>
+      <label class="upl">${formPano?'Replace':'Add'} 360° photo (2:1 panorama)<input id="fPano" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif,.insp"></label>
+      <p class="updmsg" id="panoMsg" hidden></p><div id="panoPrev"></div>
       <p class="note">Photos are resized for the web. Without a 360° photo, the wall shows the sample street scene.</p></div>
     <p class="err" id="fErr"></p>
     <div class="row2"><button class="btn btn-sun" id="saveW" type="button">${isNew?'Save wall':'Save changes'}</button><button class="btn btn-line" id="cancelW" type="button">Cancel</button></div>`;
@@ -1547,8 +1548,14 @@ function renderWallForm(w){
   $('#pickBtn').onclick=()=>{adminPick?stopPick():startPick()};
   $('#gpsBtn').onclick=()=>{if(!navigator.geolocation){toast('Location is not available on this device');return}
     navigator.geolocation.getCurrentPosition(p=>{lat.value=p.coords.latitude.toFixed(6); lon.value=p.coords.longitude.toFixed(6); sync(true)},()=>toast('Could not get your location. Allow location access or drop the pin.'),{enableHighAccuracy:true,timeout:10000})};
-  $('#fPh').onchange=async e=>{for(const f of e.target.files){const b=await shrink(f,1600,.82); formPhotos.push({blob:b,url:URL.createObjectURL(b)})} e.target.value=''; drawPh()};
-  $('#fPano').onchange=async e=>{const f=e.target.files[0]; if(!f) return; const b=await shrink(f,4096,.8); formPano={blob:b,url:URL.createObjectURL(b)}; e.target.value=''; drawPh()};
+  $('#fPh').onchange=async e=>{const fs=[...e.target.files]; e.target.value=''; if(!fs.length) return; const bad=[]; let ok=0;
+    for(let i=0;i<fs.length;i++){updMsg('#phMsg',`Preparing photo ${i+1} of ${fs.length}…`); try{const b=await shrink(fs[i],1600,.82); formPhotos.push({blob:b,url:URL.createObjectURL(b)}); ok++; drawPh()}catch(er){bad.push(fs[i].name+': '+(er.message||er))}}
+    updMsg('#phMsg',bad.length?`${ok} added. Not added: ${bad.join(' · ')}`:'',!!bad.length)};
+  $('#fPano').onchange=async e=>{const f=e.target.files[0]; e.target.value=''; if(!f) return; updMsg('#panoMsg','Preparing 360° photo… (large files take a few seconds)');
+    try{const b=await shrink(f,4096,.8); formPano={blob:b,url:URL.createObjectURL(b)}; drawPh(); const r=await new Promise(ok=>{const im=new Image(); im.onload=()=>ok(im.naturalWidth/im.naturalHeight); im.onerror=()=>ok(2); im.src=formPano.url});
+      updMsg('#panoMsg',Math.abs(r-2)>.15?'Added, but this photo is not 2:1, so the 360° view may look stretched. Export it from the camera app as a 360° (equirectangular) photo.':'',Math.abs(r-2)>.15)}
+    catch(er){updMsg('#panoMsg',f.name+': '+(er.message||er),true)}};
+  
   $('#back').onclick=$('#cancelW').onclick=()=>{stopPick(); gDraft.innerHTML=''; draftMk=null; renderAdmin('walls')};
   $('#saveW').onclick=async()=>{
     const a=parseFloat(lat.value), o=parseFloat(lon.value), ts=$('#fTs').value, id=$('#fId').value.trim().toUpperCase(), spot=$('#fSpot').value.trim();
@@ -1586,7 +1593,20 @@ function setDraftPin(a,o){const [x,y]=P(a,o); gDraft.innerHTML='';
 function startPick(){adminPick=true; $('#stage').classList.add('picking'); const b=$('#pickBtn'); if(b){b.textContent='Pin mode on · click the map'; b.classList.add('on')} toast('Click the wall’s exact spot on the map')}
 function stopPick(){adminPick=false; $('#stage')?.classList.remove('picking'); const b=$('#pickBtn'); if(b){b.textContent='Drop pin on map'; b.classList.remove('on')}}
 function pickAt(e){const q=map.createSVGPoint(); q.x=e.clientX; q.y=e.clientY; const pt=q.matrixTransform(map.getScreenCTM().inverse()); const [a,o]=unP(pt.x,pt.y); if(window.onPinPicked) window.onPinPicked(a,o)}
-function shrink(file,maxW,q){return new Promise((ok,bad)=>{const img=new Image(); img.onload=()=>{const s=Math.min(1,maxW/img.naturalWidth); const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); c.getContext('2d').drawImage(img,0,0,c.width,c.height); c.toBlob(b=>b?ok(b):bad(new Error('Image could not be processed')),'image/jpeg',q); URL.revokeObjectURL(img.src)}; img.onerror=()=>bad(new Error('That file is not an image')); img.src=URL.createObjectURL(file)})}
+function updMsg(sel,m,bad){const e=$(sel); if(!e) return; e.hidden=!m; e.textContent=m||''; e.classList.toggle('bad',!!bad)}
+let heicLib=null; function loadHeic(){return heicLib||(heicLib=new Promise((ok,bad)=>{const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js'; sc.onload=()=>ok(window.heic2any); sc.onerror=()=>{heicLib=null; bad(new Error('Could not load the HEIC converter. Check the internet connection, or set the camera to save JPG.'))}; document.head.append(sc)}))}
+async function toDecodable(file){const n=(file.name||'').toLowerCase(), t=(file.type||'').toLowerCase();
+  if(/\.(heic|heif)$/.test(n)||/heic|heif/.test(t)){const h=await loadHeic(); const out=await h({blob:file,toType:'image/jpeg',quality:.9}); return Array.isArray(out)?out[0]:out}
+  if(/\.insp$/.test(n)) return new Blob([file],{type:'image/jpeg'});
+  return file}
+function decodeImg(blob){return new Promise((ok,bad)=>{const u=URL.createObjectURL(blob); const img=new Image(); img.onload=()=>ok({img,u}); img.onerror=()=>{URL.revokeObjectURL(u); bad(new Error('This file type cannot be opened here. Use JPG or PNG.'))}; img.src=u})}
+async function shrink(file,maxW,q){
+  if(file.size>80*1024*1024) throw new Error('File is over 80 MB. Export a smaller JPG.');
+  const src=await toDecodable(file); let w,h,draw;
+  try{const {img,u}=await decodeImg(src); w=img.naturalWidth; h=img.naturalHeight; draw=(c,cw,ch)=>{c.drawImage(img,0,0,cw,ch); URL.revokeObjectURL(u)}}
+  catch(e){ if(!window.createImageBitmap) throw e; let bm; try{bm=await createImageBitmap(src)}catch(_){throw e} w=bm.width; h=bm.height; draw=(c,cw,ch)=>{c.drawImage(bm,0,0,cw,ch); bm.close&&bm.close()} }
+  const sc=Math.min(1,maxW/w); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(w*sc)); c.height=Math.max(1,Math.round(h*sc)); draw(c.getContext('2d'),c.width,c.height);
+  return await new Promise((ok,bad)=>c.toBlob(b=>b?ok(b):bad(new Error('The photo is too large for this device to process. Export a smaller JPG (e.g. 6000 px wide).')),'image/jpeg',q))}
 
 /* ---------- publishing to GitHub ---------- */
 const gh=()=>store.get('aw-gh',{repo:CONFIG.github.repo,branch:CONFIG.github.branch,token:''});
