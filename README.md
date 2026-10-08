@@ -8,6 +8,16 @@ Everything is in one file: `index.html`. Open it in a browser to run it.
 
 Demo accounts are defined in `CONFIG.accounts` in `index.html` (hashed). Ask the admin for login details; they are not listed here because this repository is public.
 
+## Adding walls (Admin)
+
+1. Sign in with an admin account → **Admin** tab → **Walls** → **+ Add a new wall**.
+2. Press **Drop pin on map** and click the wall's exact spot on the satellite map (or paste latitude/longitude, or use **Use my location** on a phone). The township, Wall ID and nearby stations/landmarks fill in automatically.
+3. Fill in the location name, nearest station, size, status, traffic, footfall and notes; add photos and a 360° panorama.
+4. **Save**: the wall appears on the map in your browser straight away (marked *Not published*).
+5. **Publish** tab → paste a GitHub fine-grained token (this repo only, *Contents: Read and write*) → **Publish**. Photos go to `photos/`, wall data to `walls.json`, and the live site updates for everyone in about a minute.
+
+Wall data lives in `walls.json`. The walls inside `index.html` are only a fallback for offline previews.
+
 ## Editing content
 
 All content lives in the `CONFIG` block at the top of the `<script>` in `index.html`:
